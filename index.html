@@ -27,10 +27,10 @@
     color:var(--ink);
     padding:24px;
   }
-  .app{ max-width:1150px; margin:0 auto; }
+  .app{ max-width:1180px; margin:0 auto; }
   .toolbar{
     display:flex; justify-content:space-between; align-items:flex-start;
-    margin-bottom:16px; flex-wrap:wrap; gap:10px;
+    margin-bottom:12px; flex-wrap:wrap; gap:10px;
   }
   .toolbar h1{
     font-size:15px; letter-spacing:.06em; text-transform:uppercase;
@@ -45,10 +45,25 @@
   }
   button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
   button.ghost{ background:transparent; }
+  button.small{ padding:3px 8px; font-size:11px; }
   button:hover{ opacity:.85; }
   button:active{ transform:translateY(1px); }
 
-  .sheet{ background:var(--paper); border:1px solid var(--ink); padding:20px 26px; }
+  /* ---- Tabs (shift) ---- */
+  .shift-tabs{
+    display:flex; gap:0; margin-bottom:0; border-bottom:2px solid var(--ink);
+  }
+  .shift-tab{
+    padding:8px 18px; font-size:12.5px; font-weight:700; cursor:pointer;
+    background:var(--panel); border:1px solid var(--ink); border-bottom:none;
+    margin-right:4px; border-radius:4px 4px 0 0; color:var(--muted);
+    user-select:none;
+  }
+  .shift-tab.active{ background:var(--paper); color:var(--accent); }
+  .shift-tab-bar{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:8px; margin-bottom:0; }
+  .shift-actions{ display:flex; gap:6px; padding-bottom:6px; }
+
+  .sheet{ background:var(--paper); border:1px solid var(--ink); border-top:none; padding:20px 26px; }
 
   .title{ text-align:center; font-weight:700; font-size:17px; letter-spacing:.02em; margin:0 0 2px; }
   .nomor{
@@ -73,8 +88,9 @@
   table.main th{ background:var(--panel); font-weight:700; text-align:center; }
   .col-rk{ width:13%; }
   .col-pos{ width:8.5%; text-align:center; }
-  .col-urut{ width:29%; }
-  .col-ket{ width:27%; }
+  .col-urut{ width:27%; }
+  .col-ket{ width:23%; }
+  .col-actions{ width:5%; }
 
   tr.block-header td{ background:var(--accent-soft); font-weight:700; font-size:12.5px; }
   .block-name-input{
@@ -87,6 +103,22 @@
   .row-actions{ display:flex; gap:4px; justify-content:flex-end; flex-wrap:wrap; }
   .row-actions button{ padding:2px 7px; font-size:10.5px; }
 
+  .row-menu-wrap{ position:relative; text-align:center; }
+  .row-menu-btn{
+    border:1px solid var(--muted); background:var(--paper); color:var(--muted);
+    width:22px; height:20px; line-height:1; font-size:13px; padding:0; border-radius:3px;
+  }
+  .row-menu{
+    position:absolute; right:0; top:22px; background:#fff; border:1px solid var(--ink);
+    box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:30; min-width:150px; display:none;
+  }
+  .row-menu.open{ display:block; }
+  .row-menu button{
+    display:block; width:100%; text-align:left; border:none; background:transparent;
+    padding:6px 10px; font-size:11px; border-radius:0;
+  }
+  .row-menu button:hover{ background:var(--accent-soft); }
+
   input.cell, select.cell, textarea.cell{
     width:100%; border:none; background:transparent; font-size:12px;
     font-family:var(--sans); padding:1px 2px; resize:none;
@@ -96,37 +128,10 @@
   .auto-line{ font-size:11.5px; line-height:1.4; }
   .warn-text{ color:var(--warn-text); font-size:10.5px; }
 
-  .ket-block{
-    grid-column: 1 / -1;
-  }
-  .ket-panel{
-    margin: 6px 0 10px;
-    border:1px solid var(--ink);
-    background:var(--panel);
-  }
-  .ket-panel-head{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:5px 8px; border-bottom:1px solid var(--ink); flex-wrap:wrap; gap:6px;
-  }
-  .ket-panel-head .label{ font-size:11px; font-weight:700; color:var(--accent); }
-  .ket-panel-head .hint{ font-size:10px; color:var(--muted); }
-  .ket-panel textarea{
-    width:100%; min-height:90px; border:none; background:#fff;
-    font-family:var(--mono); font-size:11.5px; padding:8px; resize:vertical;
-  }
-  .ket-panel textarea:focus{ outline:none; }
-  .ket-panel-foot{
-    display:flex; gap:6px; padding:6px 8px; border-top:1px solid var(--ink);
-    flex-wrap:wrap; align-items:center;
-  }
-  .posawal-inline{ display:flex; align-items:center; gap:6px; font-size:11px; }
-  .posawal-inline input{
-    width:80px; font-family:var(--mono); font-size:11.5px; padding:3px 5px;
-    border:1px solid var(--muted); border-radius:2px;
-  }
+  .open-popup-row{ text-align:center; padding:10px 0; }
+  .open-popup-row .hint{ display:block; margin-top:4px; }
 
   .footnote{ font-size:11px; margin-top:10px; line-height:1.5; }
-  .footnote b{ font-weight:700; }
   .footnote-edit{
     width:100%; min-height:50px; border:1px dashed var(--muted);
     font-family:var(--sans); font-size:11px; padding:6px; margin-top:8px;
@@ -134,7 +139,12 @@
   }
   .footnote-edit:focus{ outline:1px solid var(--accent); background:#fff; }
 
-  .sign{ margin-top:14px; width:100%; border-collapse:collapse; font-size:11.5px; }
+  .sign-caption{ display:flex; width:100%; font-size:11px; font-weight:700; margin-top:14px; }
+  .sign-caption span{ text-align:center; }
+  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:4px; background:var(--panel); }
+  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:4px; background:var(--panel); }
+
+  .sign{ width:100%; border-collapse:collapse; font-size:11.5px; }
   .sign td{ border:1px solid var(--ink); padding:6px 8px; vertical-align:top; width:16.6%; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
   .sign .field-label{ color:var(--muted); font-size:10.5px; }
@@ -144,29 +154,61 @@
   }
   .sign select:focus, .sign input:focus{ outline:none; border-bottom:1px solid var(--accent); }
 
-  .add-block-row{ text-align:center; padding:8px 0; }
-  .add-block-row button{ font-size:11px; }
-
   .hint{ font-size:10.5px; color:var(--muted); }
+
+  /* ---- Popup draggable ---- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.15); display:none; z-index:100;
+  }
+  .modal-overlay.open{ display:block; }
+  .modal-box{
+    position:fixed; top:90px; left:50%; transform:translateX(-50%);
+    width:560px; max-width:92vw; background:#fff; border:1px solid var(--ink);
+    box-shadow:0 8px 30px rgba(0,0,0,.3); z-index:101; display:none;
+    border-radius:4px; overflow:hidden;
+  }
+  .modal-box.open{ display:block; }
+  .modal-head{
+    background:var(--accent); color:#fff; padding:8px 12px; display:flex;
+    justify-content:space-between; align-items:center; cursor:move; user-select:none;
+    font-size:12.5px; font-weight:700;
+  }
+  .modal-head .close-btn{
+    background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;
+    padding:0 4px; line-height:1;
+  }
+  .modal-body{ padding:12px; }
+  .modal-body .hint{ display:block; margin-bottom:6px; }
+  .modal-body textarea{
+    width:100%; min-height:220px; border:1px solid var(--muted); background:#fdfdfd;
+    font-family:var(--mono); font-size:12px; padding:8px; resize:vertical; border-radius:3px;
+  }
+  .modal-body textarea:focus{ outline:1px solid var(--accent); }
+  .modal-foot{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:10px 12px; border-top:1px solid #ddd; flex-wrap:wrap;
+  }
+  .posawal-inline{ display:flex; align-items:center; gap:6px; font-size:11px; }
+  .posawal-inline input{
+    width:80px; font-family:var(--mono); font-size:11.5px; padding:3px 5px;
+    border:1px solid var(--muted); border-radius:2px;
+  }
 
   @media print{
     body{ background:#fff; padding:0; }
-    .toolbar{ display:none; }
+    .toolbar, .shift-tab-bar{ display:none; }
     .sheet{ border:none; padding:0; }
-    .ket-panel-foot, .row-actions, .add-block-row{ display:none !important; }
-    .ket-panel-head .hint{ display:none; }
-    .ket-panel{ border:none; background:transparent; }
-    .ket-panel textarea{ display:none; }
-    .ket-readonly-print{ display:block !important; }
+    .row-actions, .open-popup-row, .row-menu-wrap{ display:none !important; }
     input.cell, select.cell, textarea.cell{ border:none !important; outline:none !important; }
     .meta input{ border-bottom:none; }
     .footnote-edit{ border:none; }
+    .modal-overlay, .modal-box{ display:none !important; }
   }
-  .ket-readonly-print{ display:none; font-size:11px; white-space:pre-wrap; padding:8px; }
 
   @media (max-width:720px){
     .meta{ grid-template-columns: 90px 1fr; }
     table.main{ font-size:10.5px; }
+    .modal-box{ width:94vw; }
   }
 </style>
 </head>
@@ -176,12 +218,20 @@
   <div class="toolbar">
     <div>
       <h1>Form Perintah Langsir &mdash; Generator</h1>
-      <div class="sub">Ketik atau tempel (paste) urutan gerakan di kotak Keterangan tiap rangkaian, lalu klik <b>Generate dari Keterangan</b>. Kolom Posisi Awal/Akhir dan LOKO akan terisi otomatis. Data RUTE &amp; petugas bisa diedit di kode (lihat komentar DATA di bagian akhir file).</div>
+      <div class="sub">Ketik atau tempel urutan gerakan lewat tombol "Edit Keterangan" di tiap rangkaian. Kolom Posisi Awal/Akhir, LOKO, dan Urutan Pergerakan terisi otomatis &amp; bisa juga ditimpa manual langsung di tabel.</div>
     </div>
     <div class="btns">
-      <button id="btnAddBlock">+ Tambah Rangkaian</button>
       <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
-      <button id="btnReset" class="ghost">Reset Form</button>
+      <button id="btnExportShift">Export JSON (shift ini)</button>
+      <button id="btnImportShift">Import JSON (shift ini)</button>
+      <input type="file" id="fileImport" accept=".json" style="display:none">
+    </div>
+  </div>
+
+  <div class="shift-tab-bar">
+    <div class="shift-tabs" id="shiftTabs"></div>
+    <div class="shift-actions">
+      <button id="btnReset" class="ghost small">Reset shift ini</button>
     </div>
   </div>
 
@@ -214,14 +264,27 @@
           <th class="col-pos">Posisi Akhir<br>Di Jalur</th>
           <th class="col-urut">Urutan Pergerakan Langsir</th>
           <th class="col-ket">Keterangan</th>
+          <th class="col-actions"></th>
         </tr>
       </thead>
       <tbody id="tbody">
       </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="open-popup-row">
+            <button id="btnAddBlock">+ Tambah Rangkaian</button>
+            <span class="hint">Tiap rangkaian punya tombol "Edit Keterangan" sendiri untuk paste massal dari simulator.</span>
+          </td>
+        </tr>
+      </tfoot>
     </table>
 
     <textarea class="footnote-edit" id="inpFootnote"></textarea>
 
+    <div class="sign-caption">
+      <span class="cap-receive">Yang Menerima Perintah</span>
+      <span class="cap-order">Yang Memerintah</span>
+    </div>
     <table class="sign">
       <tr>
         <td class="role">PLR 1</td>
@@ -236,12 +299,31 @@
   </div>
 </div>
 
+<!-- ===== Modal popup Edit Keterangan (draggable) ===== -->
+<div class="modal-overlay" id="modalOverlay"></div>
+<div class="modal-box" id="modalBox">
+  <div class="modal-head" id="modalHead">
+    <span id="modalTitle">Edit Keterangan</span>
+    <button class="close-btn" id="modalClose">&times;</button>
+  </div>
+  <div class="modal-body">
+    <span class="hint">Format per baris: <code>LABEL: teks</code> (contoh <code>C1: AMBIL 9 KRT EX 279</code>), atau cukup <code>LABEL</code> kalau loko cuma lewat tanpa ambil/lepas.</span>
+    <textarea id="modalTextarea" placeholder="contoh:&#10;C1: AMBIL 9 KRT EX 279&#10;J.II:&#10;J.III: LEPAS SEMUA"></textarea>
+  </div>
+  <div class="modal-foot">
+    <div class="posawal-inline">
+      <label for="modalPosAwal">Posisi awal pertama:</label>
+      <input id="modalPosAwal" placeholder="DL">
+    </div>
+    <button id="modalApply" class="primary">Terapkan ke Tabel</button>
+  </div>
+</div>
+
 <script>
 /* =========================================================
    DATA — silakan diedit sesuai kebutuhan stasiun/emplasemen
    ========================================================= */
 
-// Tabel RUTE: [Posisi Awal, Posisi Akhir, Urutan Gerakan, Wesel]
 const RUTE = [
 ["D1","D2","D1-J.I-D2","28A,11A,12,10,9"],
 ["D1","C1","D1-J.I-C1","28A,11A,12,10,9,11B"],
@@ -331,7 +413,6 @@ const RUTE = [
 ["J.II","JP","J.II-JP","7,8,11,13,15,16,17"],
 ];
 
-// Tabel TTD: nama -> nipp (silakan tambah/ubah sesuai kebutuhan)
 const TTD = {
   "LISTIANTO": "64668",
   "AGUNG": "77520",
@@ -348,20 +429,33 @@ NB : W (Wesel Yang Dilalui), DL (Dipo Loko), D1 (Dipo 1), D2 (Dipo 2), C1 (Cuci 
 /* ========================================================= */
 
 const ROLES = ["PLR 1","PLR 2","PLR DIPO","MASINIS/ASMAS","SCHOWING","PPKA"];
-const STORAGE_KEY = "perintah_langsir_state_v2";
+const STORAGE_KEY = "perintah_langsir_state_v3";
+const SHIFTS = [
+  {id:"malam", label:"Dinas Malam"},
+  {id:"siang", label:"Dinas Siang"},
+  {id:"pagi",  label:"Dinas Pagi"},
+];
 
-let state = {
-  blocks: [
-    {
-      name: "EX KA279",
-      posisiAwalPertama: "DL",
-      ketText: "C1: AMBIL 9 KRT EX 279\nJ.II:\nJ.III: LEPAS SEMUA",
-      rows: [] // diisi oleh generate(); tiap row: {posAwal, posAkhir, ket}
-    }
-  ],
-  signatures: {},
-  footnote: DEFAULT_FOOTNOTE
-};
+function emptyFormState(){
+  return {
+    inpEmplasemen: "KETAPANG",
+    inpJamMulai: "",
+    inpJamSelesai: "",
+    inpNomorUrut: "13",
+    inpKtg: "KTG",
+    blocks: [
+      { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] }
+    ],
+    signatures: {},
+    footnote: DEFAULT_FOOTNOTE
+  };
+}
+
+let allShifts = {}; // { malam: state, siang: state, pagi: state }
+let activeShift = "malam";
+let state = null; // alias ke allShifts[activeShift]
+
+let modalCtx = { blockIndex: null };
 
 function buildRuteIndex(){
   const idx = {};
@@ -395,47 +489,47 @@ function renderHariTanggal(){
   document.getElementById("hariTanggal").textContent = `${hari}/${dd}-${mm}-${yyyy}`;
 }
 
-// ---- Parser: textarea keterangan -> rows ----
-// Tiap baris textarea berformat "LABEL: TEKS" atau cuma "LABEL" (tanpa keterangan).
-// LABEL = posisi AKHIR baris itu. Posisi awal baris pertama = posisiAwalPertama (manual/dari blok sebelumnya).
-// Posisi awal baris berikutnya = posisi akhir baris sebelumnya (berantai).
-function parseKeterangan(text, posisiAwalPertama){
-  const lines = String(text || "").split("\n").map(l=>l.trim()).filter(l=>l.length>0);
+// ---- rows <-> text ----
+function rowsToText(rows){
+  return rows.map(r => (r.ket && r.ket.trim()!=="") ? `${r.posAkhir}: ${r.ket}` : `${r.posAkhir}:`).join("\n");
+}
+function textToRows(text, posisiAwalPertama){
+  const lines = String(text||"").split("\n").map(l=>l.trim()).filter(l=>l.length>0);
   const rows = [];
   let prevPos = posisiAwalPertama || "";
   lines.forEach(line=>{
     const colonIdx = line.indexOf(":");
     let label, ket;
-    if(colonIdx === -1){
-      label = line.trim();
-      ket = "";
-    } else {
-      label = line.slice(0, colonIdx).trim();
-      ket = line.slice(colonIdx+1).trim();
-    }
+    if(colonIdx === -1){ label = line.trim(); ket = ""; }
+    else { label = line.slice(0, colonIdx).trim(); ket = line.slice(colonIdx+1).trim(); }
     rows.push({ posAwal: prevPos, posAkhir: label, ket: ket });
     prevPos = label;
   });
   return rows;
 }
+function recomputeChain(rows, posisiAwalPertama){
+  let prev = posisiAwalPertama || "";
+  rows.forEach(r=>{
+    r.posAwal = prev;
+    prev = r.posAkhir;
+  });
+  return rows;
+}
 
-// ---- Logika kumulatif LOKO + n KERETA ----
+// ---- LOKO kumulatif ----
 function computeLokoLabels(rows){
   let prevTotal = 0;
   return rows.map(r=>{
     const ket = (r.ket || "").toUpperCase();
     let ambil = 0, lepas = 0, lepasSemua = false;
-
     const mAmbil = ket.match(/AMBIL\s+(\d+)\s*KRT/);
     if(mAmbil) ambil = parseInt(mAmbil[1],10);
-
     if(ket.includes("LEPAS SEMUA")){
       lepasSemua = true;
     } else {
       const mLepas = ket.match(/LEPAS\s+(\d+)\s*KRT/);
       if(mLepas) lepas = parseInt(mLepas[1],10);
     }
-
     let newTotal = lepasSemua ? 0 : (prevTotal + ambil - lepas);
     const label = "LOKO" + (newTotal > 0 ? ` + ${newTotal} KERETA` : "");
     prevTotal = newTotal;
@@ -443,7 +537,7 @@ function computeLokoLabels(rows){
   });
 }
 
-// ---- Judul blok otomatis: hanya posisi dengan keterangan terisi, jumlah = banyaknya posisi tersebut ----
+// ---- Judul blok otomatis ----
 function blockTitle(rows){
   const withKet = rows.filter(r => r.ket && r.ket.trim() !== "");
   if(withKet.length === 0) return "";
@@ -451,20 +545,9 @@ function blockTitle(rows){
   return points.join("-") + ` (${points.length})`;
 }
 
-function generateBlockRows(block){
-  block.rows = parseKeterangan(block.ketText, block.posisiAwalPertama);
-}
-
-function regenerateAll(){
-  // posisi awal blok ke-N (N>1) otomatis = posisi akhir baris terakhir blok sebelumnya,
-  // KECUALI sudah pernah di-set manual berbeda oleh user (dibiarkan apa adanya di sini;
-  // tombol generate per-blok yang melakukan pengambilan otomatis ini).
-  state.blocks.forEach((block, idx)=>{
-    generateBlockRows(block);
-  });
-}
-
 function render(){
+  renderTabs();
+  renderMetaInputs();
   renderNomorSurat();
   renderHariTanggal();
 
@@ -475,14 +558,19 @@ function render(){
     const lokoLabels = computeLokoLabels(block.rows);
     const title = blockTitle(block.rows);
 
-    // header rangkaian (nama manual)
     const trHead = document.createElement("tr");
     trHead.className = "block-header";
     trHead.innerHTML = `
       <td>
         <input class="block-name-input" value="${escapeAttr(block.name)}" data-block="${bIdx}" data-field="name" placeholder="Nama rangkaian, contoh: EX KA279">
       </td>
-      <td colspan="3" class="block-title-auto">${title || "<span class='hint'>Isi kotak Keterangan di bawah lalu klik Generate</span>"}</td>
+      <td colspan="2" class="block-title-auto">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
+      <td colspan="2">
+        <div class="row-actions">
+          <button data-action="editket" data-block="${bIdx}">Edit Keterangan</button>
+          <button data-action="addrow-end" data-block="${bIdx}" title="Tambah baris di akhir rangkaian ini">+ Baris</button>
+        </div>
+      </td>
       <td>
         <div class="row-actions">
           <button data-action="delblock" data-block="${bIdx}" title="Hapus rangkaian ini">Hapus</button>
@@ -491,7 +579,6 @@ function render(){
     `;
     tbody.appendChild(trHead);
 
-    // baris-baris hasil parsing (tampilan tabel, masih bisa override manual)
     block.rows.forEach((row, rIdx)=>{
       const rute = lookupRute(row.posAwal, row.posAkhir);
       const urutText = rute
@@ -502,52 +589,51 @@ function render(){
       tr.innerHTML = `
         <td><span class="auto">${lokoLabels[rIdx]}</span></td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal" title="Bisa diedit manual untuk kasus khusus">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal">
         </td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir" title="Bisa diedit manual untuk kasus khusus">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir">
         </td>
         <td class="auto-line">${urutText}</td>
-        <td class="auto-line">${escapeHtml(row.ket) || "<span class='hint'>(kosong)</span>"}</td>
+        <td>
+          <input class="cell" value="${escapeAttr(row.ket)}" data-block="${bIdx}" data-row="${rIdx}" data-field="ket" placeholder="contoh: AMBIL 9 KRT EX 279">
+        </td>
+        <td class="row-menu-wrap">
+          <button class="row-menu-btn" data-action="togglemenu" data-block="${bIdx}" data-row="${rIdx}">&#8942;</button>
+          <div class="row-menu" data-menu-for="${bIdx}-${rIdx}">
+            <button data-action="insert-above" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di atas</button>
+            <button data-action="insert-below" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di bawah</button>
+            <button data-action="delrow" data-block="${bIdx}" data-row="${rIdx}">Hapus baris ini</button>
+          </div>
+        </td>
       `;
       tbody.appendChild(tr);
     });
-
-    // panel textarea keterangan + tombol generate, untuk blok ini
-    const trKetPanel = document.createElement("tr");
-    const ketRowHtml = `
-      <td colspan="5" class="ket-block">
-        <div class="ket-panel">
-          <div class="ket-panel-head">
-            <span class="label">Keterangan (sumber data &mdash; ketik atau tempel di sini)</span>
-            <span class="hint">format per baris: <code>LABEL: teks</code> atau cuma <code>LABEL</code> bila loko jalan tanpa ambil/lepas</span>
-          </div>
-          <textarea data-block="${bIdx}" data-field="ketText" placeholder="contoh:&#10;C1: AMBIL 9 KRT EX 279&#10;J.II:&#10;J.III: LEPAS SEMUA">${escapeHtml(block.ketText)}</textarea>
-          <div class="ket-panel-foot">
-            <div class="posawal-inline">
-              <label for="posawal-${bIdx}">Posisi awal pertama:</label>
-              <input id="posawal-${bIdx}" value="${escapeAttr(block.posisiAwalPertama)}" data-block="${bIdx}" data-field="posisiAwalPertama" placeholder="DL">
-            </div>
-            <button data-action="generate" data-block="${bIdx}" class="primary">Generate dari Keterangan</button>
-          </div>
-        </div>
-      </td>
-    `;
-    trKetPanel.innerHTML = ketRowHtml;
-    tbody.appendChild(trKetPanel);
-
-    const trAdd = document.createElement("tr");
-    trAdd.innerHTML = `
-      <td colspan="5" class="add-block-row">
-        <span class="hint">Baris tabel di atas dibentuk otomatis dari Keterangan. Setelah generate, Posisi Awal/Akhir tetap boleh ditimpa manual untuk kasus khusus (mis. tukar loko di Dipo).</span>
-      </td>
-    `;
-    tbody.appendChild(trAdd);
   });
 
   renderSignatures();
   document.getElementById("inpFootnote").value = state.footnote;
-  saveState();
+  saveAll();
+}
+
+function renderMetaInputs(){
+  document.getElementById("inpEmplasemen").value = state.inpEmplasemen;
+  document.getElementById("inpJamMulai").value = state.inpJamMulai;
+  document.getElementById("inpJamSelesai").value = state.inpJamSelesai;
+  document.getElementById("inpNomorUrut").value = state.inpNomorUrut;
+  document.getElementById("inpKtg").value = state.inpKtg;
+}
+
+function renderTabs(){
+  const wrap = document.getElementById("shiftTabs");
+  wrap.innerHTML = "";
+  SHIFTS.forEach(s=>{
+    const div = document.createElement("div");
+    div.className = "shift-tab" + (s.id === activeShift ? " active" : "");
+    div.textContent = s.label;
+    div.dataset.shift = s.id;
+    wrap.appendChild(div);
+  });
 }
 
 function renderSignatures(){
@@ -579,34 +665,79 @@ function escapeHtml(s){
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+function saveAll(){
+  try{
+    allShifts[activeShift] = state;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts }));
+  }catch(e){}
 }
-function loadState(){
+function loadAll(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){ state = JSON.parse(raw); }
+    if(raw){
+      const parsed = JSON.parse(raw);
+      allShifts = parsed.allShifts || {};
+      activeShift = parsed.activeShift || "malam";
+    }
   }catch(e){}
-  if(!state.footnote) state.footnote = DEFAULT_FOOTNOTE;
+  SHIFTS.forEach(s=>{
+    if(!allShifts[s.id]) allShifts[s.id] = emptyFormState();
+    if(!allShifts[s.id].footnote) allShifts[s.id].footnote = DEFAULT_FOOTNOTE;
+  });
+  state = allShifts[activeShift];
 }
 
-// ---- event delegation ----
+function switchShift(shiftId){
+  activeShift = shiftId;
+  state = allShifts[activeShift];
+  render();
+}
+
+// ---- event: tab klik ----
+document.getElementById("shiftTabs").addEventListener("click", e=>{
+  const tab = e.target.closest(".shift-tab");
+  if(!tab) return;
+  switchShift(tab.dataset.shift);
+});
+
+// ---- event: meta inputs ----
+["inpEmplasemen","inpJamMulai","inpJamSelesai","inpNomorUrut","inpKtg"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", (e)=>{
+    state[id] = e.target.value;
+    renderNomorSurat();
+    saveAll();
+  });
+});
+
+document.getElementById("inpFootnote").addEventListener("input", e=>{
+  state.footnote = e.target.value;
+  saveAll();
+});
+
+// ---- event delegation tbody ----
 document.getElementById("tbody").addEventListener("input", e=>{
   const t = e.target;
   const field = t.dataset.field;
   if(!field) return;
   const bIdx = parseInt(t.dataset.block,10);
 
-  if(field === "ketText" || field === "posisiAwalPertama" || field === "name"){
-    state.blocks[bIdx][field] = t.value;
-    saveState();
-    return; // tidak full re-render saat mengetik di textarea/nama, biar fokus tidak lepas
+  if(field === "name"){
+    state.blocks[bIdx].name = t.value;
+    saveAll();
+    return;
   }
 
   if(t.dataset.row !== undefined){
-    // override manual posAwal/posAkhir di baris tabel
     const rIdx = parseInt(t.dataset.row,10);
-    state.blocks[bIdx].rows[rIdx][field] = t.value;
+    const block = state.blocks[bIdx];
+    block.rows[rIdx][field] = t.value;
+
+    if(field === "posAkhir"){
+      // posisi akhir berubah -> rantai posisi awal baris setelahnya ikut berubah
+      recomputeChain(block.rows, block.posisiAwalPertama);
+    }
+    // jika field 'ket' atau 'posAwal' (override manual), tidak perlu recompute chain penuh,
+    // tapi tetap simpan & re-render supaya LOKO, judul, dan urutan rute update.
     const focusInfo = {field, bIdx, rIdx: t.dataset.row, selStart: t.selectionStart};
     render();
     restoreFocus(focusInfo);
@@ -630,21 +761,41 @@ function restoreFocus(info){
 }
 
 document.getElementById("tbody").addEventListener("click", e=>{
-  const t = e.target;
+  const t = e.target.closest("button");
+  if(!t) return;
   const action = t.dataset.action;
   if(!action) return;
   const bIdx = parseInt(t.dataset.block,10);
+  const block = state.blocks[bIdx];
 
-  if(action === "generate"){
-    generateBlockRows(state.blocks[bIdx]);
-    // auto-isi posisi awal blok berikutnya dari posisi akhir terakhir blok ini, jika kosong
-    const rows = state.blocks[bIdx].rows;
-    if(rows.length > 0 && state.blocks[bIdx+1]){
-      const lastPos = rows[rows.length-1].posAkhir;
-      if(!state.blocks[bIdx+1].posisiAwalPertama){
-        state.blocks[bIdx+1].posisiAwalPertama = lastPos;
-      }
-    }
+  closeAllRowMenus();
+
+  if(action === "togglemenu"){
+    const menu = document.querySelector(`[data-menu-for="${t.dataset.block}-${t.dataset.row}"]`);
+    if(menu){ menu.classList.toggle("open"); }
+    return;
+  }
+
+  if(action === "editket"){
+    openModal(bIdx);
+    return;
+  }
+
+  if(action === "addrow-end"){
+    block.rows.push({posAwal:"", posAkhir:"", ket:""});
+    recomputeChain(block.rows, block.posisiAwalPertama);
+  } else if(action === "insert-above"){
+    const rIdx = parseInt(t.dataset.row,10);
+    block.rows.splice(rIdx, 0, {posAwal:"", posAkhir:"", ket:""});
+    recomputeChain(block.rows, block.posisiAwalPertama);
+  } else if(action === "insert-below"){
+    const rIdx = parseInt(t.dataset.row,10);
+    block.rows.splice(rIdx+1, 0, {posAwal:"", posAkhir:"", ket:""});
+    recomputeChain(block.rows, block.posisiAwalPertama);
+  } else if(action === "delrow"){
+    const rIdx = parseInt(t.dataset.row,10);
+    block.rows.splice(rIdx,1);
+    recomputeChain(block.rows, block.posisiAwalPertama);
   } else if(action === "delblock"){
     if(state.blocks.length>1){
       state.blocks.splice(bIdx,1);
@@ -656,22 +807,25 @@ document.getElementById("tbody").addEventListener("click", e=>{
   render();
 });
 
+function closeAllRowMenus(){
+  document.querySelectorAll(".row-menu.open").forEach(m=>m.classList.remove("open"));
+}
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".row-menu-wrap")){
+    closeAllRowMenus();
+  }
+});
+
 document.getElementById("signRow").addEventListener("change", e=>{
   const role = e.target.dataset.role;
   if(role !== undefined){
     state.signatures[role] = e.target.value;
     renderSignatures();
-    saveState();
+    saveAll();
   }
 });
 
-document.getElementById("inpFootnote").addEventListener("input", e=>{
-  state.footnote = e.target.value;
-  saveState();
-});
-
 document.getElementById("btnAddBlock").addEventListener("click", ()=>{
-  // posisi awal default blok baru = posisi akhir terakhir blok sebelumnya (kalau ada)
   let defaultPosAwal = "";
   const lastBlock = state.blocks[state.blocks.length-1];
   if(lastBlock && lastBlock.rows && lastBlock.rows.length>0){
@@ -680,19 +834,16 @@ document.getElementById("btnAddBlock").addEventListener("click", ()=>{
   state.blocks.push({
     name: "RANGKAIAN BARU",
     posisiAwalPertama: defaultPosAwal,
-    ketText: "",
     rows: []
   });
   render();
 });
 
 document.getElementById("btnReset").addEventListener("click", ()=>{
-  if(confirm("Reset seluruh isi form ke kondisi kosong?")){
-    state = {
-      blocks: [{ name:"RANGKAIAN BARU", posisiAwalPertama:"DL", ketText:"", rows:[] }],
-      signatures: {},
-      footnote: DEFAULT_FOOTNOTE
-    };
+  const label = SHIFTS.find(s=>s.id===activeShift).label;
+  if(confirm(`Reset seluruh isi form untuk "${label}" ke kondisi kosong?`)){
+    allShifts[activeShift] = emptyFormState();
+    state = allShifts[activeShift];
     render();
   }
 });
@@ -701,17 +852,145 @@ document.getElementById("btnPrint").addEventListener("click", ()=>{
   window.print();
 });
 
-["inpEmplasemen","inpJamMulai","inpJamSelesai","inpNomorUrut","inpKtg"].forEach(id=>{
-  document.getElementById(id).addEventListener("input", ()=>{
-    renderNomorSurat();
-    saveState();
-  });
+// ---- Export / Import JSON per shift ----
+document.getElementById("btnExportShift").addEventListener("click", ()=>{
+  const label = SHIFTS.find(s=>s.id===activeShift).label;
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const d = new Date();
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  a.href = url;
+  a.download = `perintah-langsir_${activeShift}_${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
+document.getElementById("btnImportShift").addEventListener("click", ()=>{
+  document.getElementById("fileImport").click();
+});
+document.getElementById("fileImport").addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(!parsed.blocks){ throw new Error("format tidak sesuai"); }
+      allShifts[activeShift] = parsed;
+      state = allShifts[activeShift];
+      render();
+    }catch(err){
+      alert("Gagal membaca file JSON: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+// ---- Modal Edit Keterangan (draggable) ----
+function openModal(blockIndex){
+  modalCtx.blockIndex = blockIndex;
+  const block = state.blocks[blockIndex];
+  document.getElementById("modalTitle").textContent = "Edit Keterangan — " + (block.name || "Rangkaian");
+  document.getElementById("modalTextarea").value = rowsToText(block.rows);
+  document.getElementById("modalPosAwal").value = block.posisiAwalPertama || "";
+  document.getElementById("modalOverlay").classList.add("open");
+  document.getElementById("modalBox").classList.add("open");
+  resetModalPosition();
+}
+function closeModal(){
+  document.getElementById("modalOverlay").classList.remove("open");
+  document.getElementById("modalBox").classList.remove("open");
+  modalCtx.blockIndex = null;
+}
+function resetModalPosition(){
+  const box = document.getElementById("modalBox");
+  box.style.top = "90px";
+  box.style.left = "50%";
+  box.style.transform = "translateX(-50%)";
+}
+
+document.getElementById("modalClose").addEventListener("click", closeModal);
+document.getElementById("modalOverlay").addEventListener("click", closeModal);
+
+document.getElementById("modalApply").addEventListener("click", ()=>{
+  if(modalCtx.blockIndex === null) return;
+  const block = state.blocks[modalCtx.blockIndex];
+  const posAwal = document.getElementById("modalPosAwal").value.trim();
+  const text = document.getElementById("modalTextarea").value;
+  block.posisiAwalPertama = posAwal;
+  block.rows = textToRows(text, posAwal);
+
+  // auto-isi posisi awal blok berikutnya dari posisi akhir terakhir blok ini, jika kosong
+  const nextBlock = state.blocks[modalCtx.blockIndex+1];
+  if(nextBlock && block.rows.length>0 && !nextBlock.posisiAwalPertama){
+    nextBlock.posisiAwalPertama = block.rows[block.rows.length-1].posAkhir;
+  }
+
+  closeModal();
+  render();
+});
+
+document.getElementById("modalPosAwal").addEventListener("input", ()=>{
+  // live preview tidak wajib; cukup terapkan saat klik tombol Terapkan
+});
+
+// drag logic
+(function setupDrag(){
+  const head = document.getElementById("modalHead");
+  const box = document.getElementById("modalBox");
+  let dragging = false, offsetX = 0, offsetY = 0;
+
+  head.addEventListener("mousedown", (e)=>{
+    dragging = true;
+    const rect = box.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    box.style.transform = "none";
+    box.style.left = rect.left + "px";
+    box.style.top = rect.top + "px";
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e)=>{
+    if(!dragging) return;
+    let x = e.clientX - offsetX;
+    let y = e.clientY - offsetY;
+    x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, x));
+    y = Math.max(0, Math.min(window.innerHeight - 40, y));
+    box.style.left = x + "px";
+    box.style.top = y + "px";
+  });
+  document.addEventListener("mouseup", ()=>{ dragging = false; });
+
+  // touch support
+  head.addEventListener("touchstart", (e)=>{
+    const touch = e.touches[0];
+    dragging = true;
+    const rect = box.getBoundingClientRect();
+    offsetX = touch.clientX - rect.left;
+    offsetY = touch.clientY - rect.top;
+    box.style.transform = "none";
+    box.style.left = rect.left + "px";
+    box.style.top = rect.top + "px";
+  }, {passive:true});
+  document.addEventListener("touchmove", (e)=>{
+    if(!dragging) return;
+    const touch = e.touches[0];
+    let x = touch.clientX - offsetX;
+    let y = touch.clientY - offsetY;
+    x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, x));
+    y = Math.max(0, Math.min(window.innerHeight - 40, y));
+    box.style.left = x + "px";
+    box.style.top = y + "px";
+  }, {passive:true});
+  document.addEventListener("touchend", ()=>{ dragging = false; });
+})();
+
 // ---- init ----
-loadState();
-// generate ulang rows dari ketText yang tersimpan (supaya konsisten setelah reload)
-state.blocks.forEach(b=>{ if(!b.rows || b.rows.length===0){ generateBlockRows(b); } });
+loadAll();
 render();
 </script>
 </body>
