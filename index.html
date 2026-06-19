@@ -32,6 +32,7 @@
   .btns{ display:flex; gap:8px; flex-wrap:wrap; }
   button{ border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:7px 14px; font-size:12px; font-family:var(--sans); cursor:pointer; border-radius:3px; }
   button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.success{ background:#1f7a3d; border-color:#1f7a3d; color:#fff; }
   button.ghost{ background:transparent; }
   button.small{ padding:3px 8px; font-size:11px; }
   button:hover{ opacity:.85; }
@@ -70,6 +71,13 @@
   .meta .val{ font-family:var(--mono); }
   .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:12.5px; padding:2px 2px; background:transparent; }
   .meta input:focus{ outline:none; border-bottom:1px solid var(--accent); }
+  .date-nav{ display:flex; align-items:center; gap:6px; }
+  .date-arrow{
+    border:1px solid var(--muted); background:var(--paper); color:var(--ink);
+    width:20px; height:20px; padding:0; font-size:10px; line-height:1; border-radius:3px; cursor:pointer;
+  }
+  .date-arrow:hover{ background:var(--accent-soft); border-color:var(--accent); }
+  .date-display{ font-family:var(--mono); }
 
   table.main{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
   table.main td, table.main th{ border:1px solid var(--ink); padding:4px 6px; vertical-align:middle; overflow:hidden; }
@@ -99,9 +107,9 @@
 
   .row-menu-wrap{ position:relative; text-align:center; }
   .row-menu-btn{ border:1px solid var(--muted); background:var(--paper); color:var(--muted); width:22px; height:20px; line-height:1; font-size:13px; padding:0; border-radius:3px; }
-  .row-menu{ position:absolute; right:0; top:22px; background:#fff; border:1px solid var(--ink); box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:30; min-width:150px; display:none; }
+  .row-menu{ position:fixed; background:#fff; border:1px solid var(--ink); box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:300; min-width:160px; display:none; }
   .row-menu.open{ display:block; }
-  .row-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:6px 10px; font-size:11px; border-radius:0; }
+  .row-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:7px 10px; font-size:11.5px; border-radius:0; }
   .row-menu button:hover{ background:var(--accent-soft); }
 
   input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:12px; font-family:var(--sans); padding:1px 2px; }
@@ -401,6 +409,7 @@ function emptyFormState(){
     inpJamSelesai: "",
     inpNomorUrut: "13",
     inpKtg: "KTG",
+    dateOffsetDays: 0,
     blocks: [ { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] } ],
     signatures: {},
     footnote: DEFAULT_FOOTNOTE
@@ -439,9 +448,10 @@ function formatNomorSurat(form){
   const d = new Date();
   return `NOMOR: ${no}/${kode}/${romawiBulan(d.getMonth())}/${d.getFullYear()}`;
 }
-function formatHariTanggal(){
+function formatHariTanggal(offsetDays){
   const hariNames = ["MINGGU","SENIN","SELASA","RABU","KAMIS","JUMAT","SABTU"];
   const d = new Date();
+  d.setDate(d.getDate() + (offsetDays || 0));
   const dd = String(d.getDate()).padStart(2,"0");
   const mm = String(d.getMonth()+1).padStart(2,"0");
   return `${hariNames[d.getDay()]}/${dd}-${mm}-${d.getFullYear()}`;
@@ -532,7 +542,11 @@ function renderForm(form, fIdx){
 
     <div class="meta">
       <label>Hari/Tanggal :</label>
-      <div class="val">${formatHariTanggal()}</div>
+      <div class="val date-nav">
+        <button class="date-arrow" data-action="date-prev" data-form="${fIdx}" title="Mundur 1 hari">&#9664;</button>
+        <span class="date-display">${formatHariTanggal(form.dateOffsetDays)}</span>
+        <button class="date-arrow" data-action="date-next" data-form="${fIdx}" title="Maju 1 hari">&#9654;</button>
+      </div>
       <label>Emplasemen :</label>
       <input class="cell" data-form="${fIdx}" data-metafield="inpEmplasemen" value="${escapeAttr(form.inpEmplasemen)}">
 
@@ -611,7 +625,7 @@ function renderTbody(form, fIdx, tbody){
       <td colspan="2" class="block-title-auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
       <td colspan="2">
         <div class="row-actions">
-          <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}">Edit Keterangan</button>
+          <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}" class="success">Edit Keterangan</button>
           <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}">+ Baris</button>
         </div>
       </td>
@@ -792,7 +806,7 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
     const bIdx = parseInt(t.dataset.block,10);
     const rIdx = parseInt(t.dataset.row,10);
     const block = shiftState.forms[fIdx].blocks[bIdx];
-    block.rows[rIdx].ket = t.innerText.replace(/\n+$/,"");
+    block.rows[rIdx].ket = t.textContent.replace(/\n+$/,"");
     // update LOKO label & judul blok & urutText tanpa full rerender (supaya kursor contenteditable tidak lompat)
     updateDerivedDisplaysOnly(fIdx, bIdx);
     saveAll();
@@ -801,17 +815,62 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
   if(t.dataset.blockname !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
     const bIdx = parseInt(t.dataset.block,10);
-    shiftState.forms[fIdx].blocks[bIdx].name = t.innerText;
+    shiftState.forms[fIdx].blocks[bIdx].name = t.textContent;
     saveAll();
     return;
   }
   if(t.dataset.foot !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
-    shiftState.forms[fIdx].footnote = t.innerText;
+    shiftState.forms[fIdx].footnote = t.textContent;
     saveAll();
     return;
   }
 });
+
+// Enter di kolom Keterangan -> pindah ke baris bawah, atau buat baris baru otomatis kalau belum ada
+document.getElementById("formsContainer").addEventListener("keydown", e=>{
+  const t = e.target;
+  if(t.dataset.ketcell === undefined) return;
+  if(e.key !== "Enter") return;
+  e.preventDefault(); // jangan biarkan Enter membuat baris baru di dalam contenteditable itu sendiri
+
+  const fIdx = parseInt(t.dataset.form,10);
+  const bIdx = parseInt(t.dataset.block,10);
+  const rIdx = parseInt(t.dataset.row,10);
+  const block = shiftState.forms[fIdx].blocks[bIdx];
+
+  // pastikan perubahan ketik terakhir di baris ini sudah tersimpan sebelum pindah
+  block.rows[rIdx].ket = t.textContent.replace(/\n+$/,"");
+
+  if(rIdx + 1 < block.rows.length){
+    // baris bawah sudah ada -> langsung fokus ke sana
+    saveAll();
+    focusKetCell(fIdx, bIdx, rIdx+1);
+  } else {
+    // belum ada baris bawah -> buat baru otomatis lalu fokus ke sana
+    block.rows.push({posAwal:"", posAkhir:"", ket:""});
+    recomputeChain(block.rows, block.posisiAwalPertama);
+    render();
+    focusKetCell(fIdx, bIdx, rIdx+1);
+  }
+});
+
+function focusKetCell(fIdx, bIdx, rIdx){
+  // beri waktu 1 frame supaya DOM (jika baru di-render) sudah siap
+  requestAnimationFrame(()=>{
+    const el = document.querySelector(`[data-ketcell][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${rIdx}"]`);
+    if(el){
+      el.focus();
+      // taruh kursor di akhir teks
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+}
 
 // update LOKO + judul blok di DOM tanpa re-render total (supaya caret contenteditable tetap di tempat)
 function updateDerivedDisplaysOnly(fIdx, bIdx){
@@ -869,7 +928,9 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
   const action = t.dataset.action;
   if(!action) return;
 
-  closeAllRowMenus();
+  if(action !== "togglemenu"){
+    closeAllRowMenus();
+  }
 
   if(action === "delform"){
     const fIdx = parseInt(t.dataset.form,10);
@@ -879,6 +940,16 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
         render();
       }
     }
+    return;
+  }
+
+  if(action === "date-prev" || action === "date-next"){
+    const fIdx = parseInt(t.dataset.form,10);
+    const form = shiftState.forms[fIdx];
+    form.dateOffsetDays = (form.dateOffsetDays || 0) + (action === "date-next" ? 1 : -1);
+    const dateSpan = t.parentElement.querySelector(".date-display");
+    if(dateSpan) dateSpan.textContent = formatHariTanggal(form.dateOffsetDays);
+    saveAll();
     return;
   }
 
@@ -902,7 +973,18 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
 
   if(action === "togglemenu"){
     const menu = document.querySelector(`[data-menu-for="${t.dataset.form}-${t.dataset.block}-${t.dataset.row}"]`);
-    if(menu){ menu.classList.toggle("open"); }
+    if(menu){
+      const alreadyOpen = menu.classList.contains("open");
+      closeAllRowMenus();
+      if(!alreadyOpen){
+        const rect = t.getBoundingClientRect();
+        menu.style.top = (rect.bottom + 4) + "px";
+        let left = rect.right - 160;
+        left = Math.max(4, Math.min(window.innerWidth - 164, left));
+        menu.style.left = left + "px";
+        menu.classList.add("open");
+      }
+    }
     return;
   }
   if(action === "editket"){ openModal(fIdx, bIdx); return; }
