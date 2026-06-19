@@ -14,116 +14,102 @@
     --accent-soft:#f4e9e9;
     --bg:#eef0f2;
     --panel:#f7f8f9;
-    --warn-bg:#fff4e0;
     --warn-text:#8a5a00;
     --mono: "JetBrains Mono", "Courier New", monospace;
     --sans: "IBM Plex Sans", Arial, sans-serif;
+    --col-rk: 13%;
+    --col-pos: 8.5%;
+    --col-urut: 27%;
+    --col-ket: 23%;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    font-family:var(--sans);
-    color:var(--ink);
-    padding:24px;
-  }
+  body{ margin:0; background:var(--bg); font-family:var(--sans); color:var(--ink); padding:24px; }
   .app{ max-width:1180px; margin:0 auto; }
-  .toolbar{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    margin-bottom:12px; flex-wrap:wrap; gap:10px;
-  }
-  .toolbar h1{
-    font-size:15px; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--accent); margin:0; font-weight:700;
-  }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:10px; }
+  .toolbar h1{ font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin:0; font-weight:700; }
   .toolbar .sub{ font-size:11px; color:var(--muted); margin-top:2px; max-width:560px; }
   .btns{ display:flex; gap:8px; flex-wrap:wrap; }
-  button{
-    border:1px solid var(--ink); background:var(--paper); color:var(--ink);
-    padding:7px 14px; font-size:12px; font-family:var(--sans);
-    cursor:pointer; border-radius:3px;
-  }
+  button{ border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:7px 14px; font-size:12px; font-family:var(--sans); cursor:pointer; border-radius:3px; }
   button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
   button.ghost{ background:transparent; }
   button.small{ padding:3px 8px; font-size:11px; }
   button:hover{ opacity:.85; }
   button:active{ transform:translateY(1px); }
 
-  /* ---- Tabs (shift) ---- */
-  .shift-tabs{
-    display:flex; gap:0; margin-bottom:0; border-bottom:2px solid var(--ink);
-  }
-  .shift-tab{
-    padding:8px 18px; font-size:12.5px; font-weight:700; cursor:pointer;
-    background:var(--panel); border:1px solid var(--ink); border-bottom:none;
-    margin-right:4px; border-radius:4px 4px 0 0; color:var(--muted);
-    user-select:none;
-  }
-  .shift-tab.active{ background:var(--paper); color:var(--accent); }
   .shift-tab-bar{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:8px; margin-bottom:0; }
+  .shift-tabs{ display:flex; gap:0; border-bottom:2px solid var(--ink); }
+  .shift-tab{ padding:8px 18px; font-size:12.5px; font-weight:700; cursor:pointer; background:var(--panel); border:1px solid var(--ink); border-bottom:none; margin-right:4px; border-radius:4px 4px 0 0; color:var(--muted); user-select:none; }
+  .shift-tab.active{ background:var(--paper); color:var(--accent); }
   .shift-actions{ display:flex; gap:6px; padding-bottom:6px; }
 
-  .sheet{ background:var(--paper); border:1px solid var(--ink); border-top:none; padding:20px 26px; }
+  /* Global format bar (kolom otomatis) */
+  .format-bar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--ink); border-top:none;
+    padding:7px 12px; font-size:11px;
+  }
+  .format-bar .grp{ display:flex; align-items:center; gap:5px; }
+  .format-bar label{ color:var(--muted); }
+  .format-bar select{ font-size:11px; padding:2px 4px; border:1px solid var(--muted); border-radius:2px; }
+
+  .form-wrap{ margin-bottom:26px; }
+  .form-wrap:not(:first-child){ page-break-before:always; }
+
+  .form-head-bar{ display:flex; justify-content:space-between; align-items:center; margin:14px 0 4px; }
+  .form-head-bar .form-label{ font-size:11.5px; font-weight:700; color:var(--accent); }
+  .form-head-bar .form-del{ font-size:10.5px; padding:3px 8px; }
+
+  .sheet{ background:var(--paper); border:1px solid var(--ink); padding:20px 26px; }
 
   .title{ text-align:center; font-weight:700; font-size:17px; letter-spacing:.02em; margin:0 0 2px; }
-  .nomor{
-    text-align:center; font-size:13px; margin:0 0 14px;
-    font-family:var(--mono); color:var(--accent); font-weight:600;
-  }
+  .nomor{ text-align:center; font-size:13px; margin:0 0 14px; font-family:var(--mono); color:var(--accent); font-weight:600; }
 
-  .meta{
-    display:grid; grid-template-columns: 110px 1fr 90px 1fr;
-    gap:4px 8px; font-size:12.5px; margin-bottom:10px;
-  }
+  .meta{ display:grid; grid-template-columns: 110px 1fr 90px 1fr; gap:4px 8px; font-size:12.5px; margin-bottom:10px; }
   .meta label{ font-weight:700; }
   .meta .val{ font-family:var(--mono); }
-  .meta input{
-    width:100%; border:none; border-bottom:1px dotted var(--muted);
-    font-family:var(--mono); font-size:12.5px; padding:2px 2px; background:transparent;
-  }
+  .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:12.5px; padding:2px 2px; background:transparent; }
   .meta input:focus{ outline:none; border-bottom:1px solid var(--accent); }
 
-  table.main{ width:100%; border-collapse:collapse; font-size:12px; }
-  table.main td, table.main th{ border:1px solid var(--ink); padding:4px 6px; vertical-align:middle; }
-  table.main th{ background:var(--panel); font-weight:700; text-align:center; }
-  .col-rk{ width:13%; }
-  .col-pos{ width:8.5%; text-align:center; }
-  .col-urut{ width:27%; }
-  .col-ket{ width:23%; }
-  .col-actions{ width:5%; }
+  table.main{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  table.main td, table.main th{ border:1px solid var(--ink); padding:4px 6px; vertical-align:middle; overflow:hidden; }
+  table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; }
+  .col-rk{ width:var(--col-rk); }
+  .col-pos{ width:var(--col-pos); text-align:center; }
+  .col-urut{ width:var(--col-urut); }
+  .col-ket{ width:var(--col-ket); }
+  .col-actions{ width:34px; }
+
+  .col-resizer{
+    position:absolute; right:-3px; top:0; width:6px; height:100%; cursor:col-resize; z-index:5;
+  }
+  .col-resizer:hover{ background:rgba(138,31,31,.3); }
 
   tr.block-header td{ background:var(--accent-soft); font-weight:700; font-size:12.5px; }
-  .block-name-input{
-    width:100%; border:none; background:transparent; font-weight:700;
-    font-size:12.5px; font-family:var(--sans); padding:1px 2px;
+  .block-name-edit{
+    width:100%; min-height:18px; font-weight:700; font-size:12.5px; font-family:var(--sans);
+    padding:1px 2px; cursor:text;
   }
-  .block-name-input:focus{ outline:1px solid var(--accent); background:#fff; }
+  .block-name-edit:focus{ outline:1px solid var(--accent); background:#fff; }
+  .block-name-edit:empty:before{ content: attr(data-placeholder); color:var(--muted); font-weight:400; }
   .block-title-auto{ text-align:center; font-family:var(--mono); font-size:12px; }
 
   .row-actions{ display:flex; gap:4px; justify-content:flex-end; flex-wrap:wrap; }
   .row-actions button{ padding:2px 7px; font-size:10.5px; }
 
   .row-menu-wrap{ position:relative; text-align:center; }
-  .row-menu-btn{
-    border:1px solid var(--muted); background:var(--paper); color:var(--muted);
-    width:22px; height:20px; line-height:1; font-size:13px; padding:0; border-radius:3px;
-  }
-  .row-menu{
-    position:absolute; right:0; top:22px; background:#fff; border:1px solid var(--ink);
-    box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:30; min-width:150px; display:none;
-  }
+  .row-menu-btn{ border:1px solid var(--muted); background:var(--paper); color:var(--muted); width:22px; height:20px; line-height:1; font-size:13px; padding:0; border-radius:3px; }
+  .row-menu{ position:absolute; right:0; top:22px; background:#fff; border:1px solid var(--ink); box-shadow:0 3px 10px rgba(0,0,0,.18); z-index:30; min-width:150px; display:none; }
   .row-menu.open{ display:block; }
-  .row-menu button{
-    display:block; width:100%; text-align:left; border:none; background:transparent;
-    padding:6px 10px; font-size:11px; border-radius:0;
-  }
+  .row-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:6px 10px; font-size:11px; border-radius:0; }
   .row-menu button:hover{ background:var(--accent-soft); }
 
-  input.cell, select.cell, textarea.cell{
-    width:100%; border:none; background:transparent; font-size:12px;
-    font-family:var(--sans); padding:1px 2px; resize:none;
-  }
-  input.cell:focus, select.cell:focus, textarea.cell:focus{ outline:1px solid var(--accent); background:#fff; }
+  input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:12px; font-family:var(--sans); padding:1px 2px; }
+  input.cell:focus, select.cell:focus{ outline:1px solid var(--accent); background:#fff; }
+  .editable-cell{ width:100%; min-height:16px; font-size:12px; font-family:var(--sans); padding:1px 2px; cursor:text; white-space:pre-wrap; word-break:break-word; }
+  .editable-cell:focus{ outline:1px solid var(--accent); background:#fff; }
+  .editable-cell:empty:before{ content: attr(data-placeholder); color:var(--muted); }
+
   .auto{ color:var(--accent); font-weight:600; font-family:var(--mono); font-size:11.5px; }
   .auto-line{ font-size:11.5px; line-height:1.4; }
   .warn-text{ color:var(--warn-text); font-size:10.5px; }
@@ -133,76 +119,64 @@
 
   .footnote{ font-size:11px; margin-top:10px; line-height:1.5; }
   .footnote-edit{
-    width:100%; min-height:50px; border:1px dashed var(--muted);
-    font-family:var(--sans); font-size:11px; padding:6px; margin-top:8px;
-    background:transparent; resize:vertical;
+    width:100%; min-height:50px; border:1px dashed var(--muted); font-family:var(--sans);
+    font-size:11px; padding:6px; margin-top:8px; background:transparent; cursor:text; white-space:pre-wrap;
   }
   .footnote-edit:focus{ outline:1px solid var(--accent); background:#fff; }
 
   .sign-caption{ display:flex; width:100%; font-size:11px; font-weight:700; margin-top:14px; }
-  .sign-caption span{ text-align:center; }
-  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:4px; background:var(--panel); }
-  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:4px; background:var(--panel); }
+  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:4px; background:var(--panel); text-align:center; }
+  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:4px; background:var(--panel); text-align:center; }
 
   .sign{ width:100%; border-collapse:collapse; font-size:11.5px; }
   .sign td{ border:1px solid var(--ink); padding:6px 8px; vertical-align:top; width:16.6%; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
   .sign .field-label{ color:var(--muted); font-size:10.5px; }
-  .sign select, .sign input{
-    width:100%; font-family:var(--sans); font-size:11.5px; border:none;
-    border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0;
-  }
-  .sign select:focus, .sign input:focus{ outline:none; border-bottom:1px solid var(--accent); }
+  .sign select{ width:100%; font-family:var(--sans); font-size:11.5px; border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
+  .sign select:focus{ outline:none; border-bottom:1px solid var(--accent); }
+  .sign .nipp-display{ font-size:11.5px; padding:2px 0; }
 
   .hint{ font-size:10.5px; color:var(--muted); }
 
-  /* ---- Popup draggable ---- */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.15); display:none; z-index:100;
+  .add-form-row{ text-align:center; margin-top:18px; }
+
+  /* ---- Floating font toolbar ---- */
+  .float-toolbar{
+    position:fixed; display:none; z-index:200; background:#fff; border:1px solid var(--ink);
+    box-shadow:0 4px 16px rgba(0,0,0,.25); border-radius:5px; padding:6px 8px; gap:6px; align-items:center;
   }
+  .float-toolbar.open{ display:flex; }
+  .float-toolbar select{ font-size:11px; padding:2px 4px; border:1px solid var(--muted); border-radius:2px; }
+
+  /* ---- Modal draggable ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.15); display:none; z-index:100; }
   .modal-overlay.open{ display:block; }
   .modal-box{
-    position:fixed; top:90px; left:50%; transform:translateX(-50%);
-    width:560px; max-width:92vw; background:#fff; border:1px solid var(--ink);
-    box-shadow:0 8px 30px rgba(0,0,0,.3); z-index:101; display:none;
-    border-radius:4px; overflow:hidden;
+    position:fixed; top:90px; left:50%; transform:translateX(-50%); width:560px; max-width:92vw;
+    background:#fff; border:1px solid var(--ink); box-shadow:0 8px 30px rgba(0,0,0,.3); z-index:101;
+    display:none; border-radius:4px; overflow:hidden;
   }
   .modal-box.open{ display:block; }
-  .modal-head{
-    background:var(--accent); color:#fff; padding:8px 12px; display:flex;
-    justify-content:space-between; align-items:center; cursor:move; user-select:none;
-    font-size:12.5px; font-weight:700;
-  }
-  .modal-head .close-btn{
-    background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer;
-    padding:0 4px; line-height:1;
-  }
+  .modal-head{ background:var(--accent); color:#fff; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; cursor:move; user-select:none; font-size:12.5px; font-weight:700; }
+  .modal-head .close-btn{ background:transparent; border:none; color:#fff; font-size:16px; cursor:pointer; padding:0 4px; line-height:1; }
   .modal-body{ padding:12px; }
   .modal-body .hint{ display:block; margin-bottom:6px; }
-  .modal-body textarea{
-    width:100%; min-height:220px; border:1px solid var(--muted); background:#fdfdfd;
-    font-family:var(--mono); font-size:12px; padding:8px; resize:vertical; border-radius:3px;
-  }
+  .modal-body textarea{ width:100%; min-height:220px; border:1px solid var(--muted); background:#fdfdfd; font-family:var(--mono); font-size:12px; padding:8px; resize:vertical; border-radius:3px; }
   .modal-body textarea:focus{ outline:1px solid var(--accent); }
-  .modal-foot{
-    display:flex; justify-content:space-between; align-items:center; gap:8px;
-    padding:10px 12px; border-top:1px solid #ddd; flex-wrap:wrap;
-  }
+  .modal-foot{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border-top:1px solid #ddd; flex-wrap:wrap; }
   .posawal-inline{ display:flex; align-items:center; gap:6px; font-size:11px; }
-  .posawal-inline input{
-    width:80px; font-family:var(--mono); font-size:11.5px; padding:3px 5px;
-    border:1px solid var(--muted); border-radius:2px;
-  }
+  .posawal-inline input{ width:80px; font-family:var(--mono); font-size:11.5px; padding:3px 5px; border:1px solid var(--muted); border-radius:2px; }
 
   @media print{
     body{ background:#fff; padding:0; }
-    .toolbar, .shift-tab-bar{ display:none; }
+    .toolbar, .shift-tab-bar, .format-bar, .form-head-bar{ display:none; }
     .sheet{ border:none; padding:0; }
-    .row-actions, .open-popup-row, .row-menu-wrap{ display:none !important; }
-    input.cell, select.cell, textarea.cell{ border:none !important; outline:none !important; }
+    .row-actions, .open-popup-row, .row-menu-wrap, .add-form-row{ display:none !important; }
+    input.cell, select.cell{ border:none !important; outline:none !important; }
     .meta input{ border-bottom:none; }
     .footnote-edit{ border:none; }
-    .modal-overlay, .modal-box{ display:none !important; }
+    .modal-overlay, .modal-box, .float-toolbar{ display:none !important; }
+    .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
   }
 
   @media (max-width:720px){
@@ -218,7 +192,7 @@
   <div class="toolbar">
     <div>
       <h1>Form Perintah Langsir &mdash; Generator</h1>
-      <div class="sub">Ketik atau tempel urutan gerakan lewat tombol "Edit Keterangan" di tiap rangkaian. Kolom Posisi Awal/Akhir, LOKO, dan Urutan Pergerakan terisi otomatis &amp; bisa juga ditimpa manual langsung di tabel.</div>
+      <div class="sub">Klik "Edit Keterangan" untuk paste massal dari simulator. Blok teks manual (nama rangkaian, keterangan, catatan kaki) untuk ubah font/ukuran. Geser tepi kolom header untuk atur lebar.</div>
     </div>
     <div class="btns">
       <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
@@ -235,68 +209,52 @@
     </div>
   </div>
 
-  <div class="sheet" id="sheet">
-    <p class="title">FORM PERINTAH LANGSIR</p>
-    <p class="nomor" id="nomorSurat"></p>
-
-    <div class="meta">
-      <label>Hari/Tanggal :</label>
-      <div class="val" id="hariTanggal"></div>
-      <label>Emplasemen :</label>
-      <input class="cell" id="inpEmplasemen" value="KETAPANG">
-
-      <label>Jam Mulai :</label>
-      <input class="cell" id="inpJamMulai" placeholder="contoh: 15.00">
-      <label></label>
-      <input class="cell" id="inpNomorUrut" placeholder="No. urut (contoh: 13)" value="13" style="font-family:var(--mono)">
-
-      <label>Jam Selesai :</label>
-      <input class="cell" id="inpJamSelesai" placeholder="contoh: 16.30">
-      <label></label>
-      <input class="cell" id="inpKtg" placeholder="Kode (contoh: KTG)" value="KTG" style="font-family:var(--mono)">
+  <div class="format-bar">
+    <div class="grp">
+      <label>Font kolom otomatis (LOKO &amp; Urutan Pergerakan):</label>
+      <select id="globalFontFamily">
+        <option value="'JetBrains Mono','Courier New',monospace">Monospace</option>
+        <option value="'IBM Plex Sans',Arial,sans-serif">Sans</option>
+        <option value="Georgia,serif">Serif</option>
+      </select>
     </div>
-
-    <table class="main">
-      <thead>
-        <tr>
-          <th class="col-rk">Rangkaian/No<br>Kereta/Gerbong</th>
-          <th class="col-pos">Posisi Awal<br>Di Jalur</th>
-          <th class="col-pos">Posisi Akhir<br>Di Jalur</th>
-          <th class="col-urut">Urutan Pergerakan Langsir</th>
-          <th class="col-ket">Keterangan</th>
-          <th class="col-actions"></th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="6" class="open-popup-row">
-            <button id="btnAddBlock">+ Tambah Rangkaian</button>
-            <span class="hint">Tiap rangkaian punya tombol "Edit Keterangan" sendiri untuk paste massal dari simulator.</span>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <textarea class="footnote-edit" id="inpFootnote"></textarea>
-
-    <div class="sign-caption">
-      <span class="cap-receive">Yang Menerima Perintah</span>
-      <span class="cap-order">Yang Memerintah</span>
+    <div class="grp">
+      <label>Ukuran:</label>
+      <select id="globalFontSize">
+        <option value="10">10px</option>
+        <option value="10.5">10.5px</option>
+        <option value="11.5">11.5px (default)</option>
+        <option value="12.5">12.5px</option>
+        <option value="14">14px</option>
+        <option value="16">16px</option>
+      </select>
     </div>
-    <table class="sign">
-      <tr>
-        <td class="role">PLR 1</td>
-        <td class="role">PLR 2</td>
-        <td class="role">PLR DIPO</td>
-        <td class="role">MASINIS/ASMAS</td>
-        <td class="role">SCHOWING</td>
-        <td class="role">PPKA</td>
-      </tr>
-      <tr id="signRow"></tr>
-    </table>
   </div>
+
+  <div id="formsContainer"></div>
+
+  <div class="add-form-row">
+    <button id="btnAddForm" class="primary">+ Tambah Form Langsir</button>
+    <div class="hint">Membuat form baru (nomor surat, jam, rangkaian, tanda tangan terpisah) dalam shift yang sama. Semua form tercetak berurutan, masing-masing di halaman baru.</div>
+  </div>
+</div>
+
+<!-- ===== Floating toolbar font (untuk blok teks manual) ===== -->
+<div class="float-toolbar" id="floatToolbar">
+  <select id="ftFontFamily">
+    <option value="'IBM Plex Sans',Arial,sans-serif">Sans</option>
+    <option value="'JetBrains Mono','Courier New',monospace">Monospace</option>
+    <option value="Georgia,serif">Serif</option>
+  </select>
+  <select id="ftFontSize">
+    <option value="10">10px</option>
+    <option value="11">11px</option>
+    <option value="12">12px (default)</option>
+    <option value="14">14px</option>
+    <option value="16">16px</option>
+    <option value="18">18px</option>
+    <option value="22">22px</option>
+  </select>
 </div>
 
 <!-- ===== Modal popup Edit Keterangan (draggable) ===== -->
@@ -429,7 +387,7 @@ NB : W (Wesel Yang Dilalui), DL (Dipo Loko), D1 (Dipo 1), D2 (Dipo 2), C1 (Cuci 
 /* ========================================================= */
 
 const ROLES = ["PLR 1","PLR 2","PLR DIPO","MASINIS/ASMAS","SCHOWING","PPKA"];
-const STORAGE_KEY = "perintah_langsir_state_v3";
+const STORAGE_KEY = "perintah_langsir_state_v4";
 const SHIFTS = [
   {id:"malam", label:"Dinas Malam"},
   {id:"siang", label:"Dinas Siang"},
@@ -443,19 +401,23 @@ function emptyFormState(){
     inpJamSelesai: "",
     inpNomorUrut: "13",
     inpKtg: "KTG",
-    blocks: [
-      { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] }
-    ],
+    blocks: [ { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] } ],
     signatures: {},
     footnote: DEFAULT_FOOTNOTE
   };
 }
+function emptyShiftState(){
+  return { forms: [ emptyFormState() ] };
+}
 
-let allShifts = {}; // { malam: state, siang: state, pagi: state }
+let allShifts = {};
 let activeShift = "malam";
-let state = null; // alias ke allShifts[activeShift]
+let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 
-let modalCtx = { blockIndex: null };
+let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 11.5 };
+let colWidths = { rk:13, pos:8.5, urut:27, ket:23 }; // persen
+
+let modalCtx = { formIndex: null, blockIndex: null };
 
 function buildRuteIndex(){
   const idx = {};
@@ -463,30 +425,26 @@ function buildRuteIndex(){
   return idx;
 }
 const RUTE_INDEX = buildRuteIndex();
-
 function lookupRute(posAwal, posAkhir){
   if(!posAwal || !posAkhir) return null;
   return RUTE_INDEX[posAwal.trim()+"|"+posAkhir.trim()] || null;
 }
 
-function renderNomorSurat(){
-  const no = (document.getElementById("inpNomorUrut").value || "0").padStart(2,"0");
-  const kode = document.getElementById("inpKtg").value || "KTG";
-  const romawi = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
-  const d = new Date();
-  const bulan = romawi[d.getMonth()];
-  const tahun = d.getFullYear();
-  document.getElementById("nomorSurat").textContent = `NOMOR: ${no}/${kode}/${bulan}/${tahun}`;
+function romawiBulan(m){
+  return ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][m];
 }
-
-function renderHariTanggal(){
+function formatNomorSurat(form){
+  const no = (form.inpNomorUrut || "0").padStart(2,"0");
+  const kode = form.inpKtg || "KTG";
+  const d = new Date();
+  return `NOMOR: ${no}/${kode}/${romawiBulan(d.getMonth())}/${d.getFullYear()}`;
+}
+function formatHariTanggal(){
   const hariNames = ["MINGGU","SENIN","SELASA","RABU","KAMIS","JUMAT","SABTU"];
   const d = new Date();
-  const hari = hariNames[d.getDay()];
   const dd = String(d.getDate()).padStart(2,"0");
   const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  document.getElementById("hariTanggal").textContent = `${hari}/${dd}-${mm}-${yyyy}`;
+  return `${hariNames[d.getDay()]}/${dd}-${mm}-${d.getFullYear()}`;
 }
 
 // ---- rows <-> text ----
@@ -509,14 +467,10 @@ function textToRows(text, posisiAwalPertama){
 }
 function recomputeChain(rows, posisiAwalPertama){
   let prev = posisiAwalPertama || "";
-  rows.forEach(r=>{
-    r.posAwal = prev;
-    prev = r.posAkhir;
-  });
+  rows.forEach(r=>{ r.posAwal = prev; prev = r.posAkhir; });
   return rows;
 }
 
-// ---- LOKO kumulatif ----
 function computeLokoLabels(rows){
   let prevTotal = 0;
   return rows.map(r=>{
@@ -524,37 +478,127 @@ function computeLokoLabels(rows){
     let ambil = 0, lepas = 0, lepasSemua = false;
     const mAmbil = ket.match(/AMBIL\s+(\d+)\s*KRT/);
     if(mAmbil) ambil = parseInt(mAmbil[1],10);
-    if(ket.includes("LEPAS SEMUA")){
-      lepasSemua = true;
-    } else {
-      const mLepas = ket.match(/LEPAS\s+(\d+)\s*KRT/);
-      if(mLepas) lepas = parseInt(mLepas[1],10);
-    }
+    if(ket.includes("LEPAS SEMUA")){ lepasSemua = true; }
+    else { const mLepas = ket.match(/LEPAS\s+(\d+)\s*KRT/); if(mLepas) lepas = parseInt(mLepas[1],10); }
     let newTotal = lepasSemua ? 0 : (prevTotal + ambil - lepas);
     const label = "LOKO" + (newTotal > 0 ? ` + ${newTotal} KERETA` : "");
     prevTotal = newTotal;
     return label;
   });
 }
-
-// ---- Judul blok otomatis ----
 function blockTitle(rows){
   const withKet = rows.filter(r => r.ket && r.ket.trim() !== "");
   if(withKet.length === 0) return "";
-  const points = withKet.map(r => r.posAkhir);
-  return points.join("-") + ` (${points.length})`;
+  return withKet.map(r => r.posAkhir).join("-") + ` (${withKet.length})`;
 }
 
+function escapeAttr(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function escapeHtml(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ============== RENDER ============== */
+
 function render(){
+  applyColWidths();
   renderTabs();
-  renderMetaInputs();
-  renderNomorSurat();
-  renderHariTanggal();
+  renderFormatBarValues();
 
-  const tbody = document.getElementById("tbody");
+  const container = document.getElementById("formsContainer");
+  container.innerHTML = "";
+
+  shiftState.forms.forEach((form, fIdx)=>{
+    container.appendChild(renderForm(form, fIdx));
+  });
+
+  saveAll();
+}
+
+function renderForm(form, fIdx){
+  const wrap = document.createElement("div");
+  wrap.className = "form-wrap";
+
+  const headBar = document.createElement("div");
+  headBar.className = "form-head-bar";
+  headBar.innerHTML = `
+    <span class="form-label">Form ${fIdx+1}</span>
+    <button class="form-del small ghost" data-action="delform" data-form="${fIdx}" ${shiftState.forms.length<=1?"disabled":""}>Hapus Form Ini</button>
+  `;
+  wrap.appendChild(headBar);
+
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  sheet.innerHTML = `
+    <p class="title">FORM PERINTAH LANGSIR</p>
+    <p class="nomor">${formatNomorSurat(form)}</p>
+
+    <div class="meta">
+      <label>Hari/Tanggal :</label>
+      <div class="val">${formatHariTanggal()}</div>
+      <label>Emplasemen :</label>
+      <input class="cell" data-form="${fIdx}" data-metafield="inpEmplasemen" value="${escapeAttr(form.inpEmplasemen)}">
+
+      <label>Jam Mulai :</label>
+      <input class="cell" data-form="${fIdx}" data-metafield="inpJamMulai" value="${escapeAttr(form.inpJamMulai)}" placeholder="contoh: 15.00">
+      <label></label>
+      <input class="cell" data-form="${fIdx}" data-metafield="inpNomorUrut" value="${escapeAttr(form.inpNomorUrut)}" placeholder="No. urut" style="font-family:var(--mono)">
+
+      <label>Jam Selesai :</label>
+      <input class="cell" data-form="${fIdx}" data-metafield="inpJamSelesai" value="${escapeAttr(form.inpJamSelesai)}" placeholder="contoh: 16.30">
+      <label></label>
+      <input class="cell" data-form="${fIdx}" data-metafield="inpKtg" value="${escapeAttr(form.inpKtg)}" placeholder="Kode" style="font-family:var(--mono)">
+    </div>
+
+    <table class="main">
+      <thead>
+        <tr>
+          <th class="col-rk">Rangkaian/No<br>Kereta/Gerbong<span class="col-resizer" data-colkey="rk"></span></th>
+          <th class="col-pos">Posisi Awal<br>Di Jalur<span class="col-resizer" data-colkey="pos1"></span></th>
+          <th class="col-pos">Posisi Akhir<br>Di Jalur<span class="col-resizer" data-colkey="pos2"></span></th>
+          <th class="col-urut">Urutan Pergerakan Langsir<span class="col-resizer" data-colkey="urut"></span></th>
+          <th class="col-ket">Keterangan<span class="col-resizer" data-colkey="ket"></span></th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody data-tbody-for="${fIdx}"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" class="open-popup-row">
+            <button data-action="addblock" data-form="${fIdx}">+ Tambah Rangkaian</button>
+            <span class="hint">Tiap rangkaian punya tombol "Edit Keterangan" sendiri untuk paste massal dari simulator.</span>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="footnote-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-foot="1" data-placeholder="Catatan kaki...">${escapeHtml(form.footnote)}</div>
+
+    <div class="sign-caption">
+      <span class="cap-receive">Yang Menerima Perintah</span>
+      <span class="cap-order">Yang Memerintah</span>
+    </div>
+    <table class="sign">
+      <tr>
+        <td class="role">PLR 1</td>
+        <td class="role">PLR 2</td>
+        <td class="role">PLR DIPO</td>
+        <td class="role">MASINIS/ASMAS</td>
+        <td class="role">SCHOWING</td>
+        <td class="role">PPKA</td>
+      </tr>
+      <tr data-signrow-for="${fIdx}"></tr>
+    </table>
+  `;
+  wrap.appendChild(sheet);
+
+  // render tbody isinya
+  renderTbody(form, fIdx, sheet.querySelector(`[data-tbody-for="${fIdx}"]`));
+  renderSignRow(form, fIdx, sheet.querySelector(`[data-signrow-for="${fIdx}"]`));
+
+  return wrap;
+}
+
+function renderTbody(form, fIdx, tbody){
   tbody.innerHTML = "";
-
-  state.blocks.forEach((block, bIdx)=>{
+  form.blocks.forEach((block, bIdx)=>{
     const lokoLabels = computeLokoLabels(block.rows);
     const title = blockTitle(block.rows);
 
@@ -562,18 +606,18 @@ function render(){
     trHead.className = "block-header";
     trHead.innerHTML = `
       <td>
-        <input class="block-name-input" value="${escapeAttr(block.name)}" data-block="${bIdx}" data-field="name" placeholder="Nama rangkaian, contoh: EX KA279">
+        <div class="block-name-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-blockname="1" data-placeholder="Nama rangkaian">${escapeHtml(block.name)}</div>
       </td>
-      <td colspan="2" class="block-title-auto">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
+      <td colspan="2" class="block-title-auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
       <td colspan="2">
         <div class="row-actions">
-          <button data-action="editket" data-block="${bIdx}">Edit Keterangan</button>
-          <button data-action="addrow-end" data-block="${bIdx}" title="Tambah baris di akhir rangkaian ini">+ Baris</button>
+          <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}">Edit Keterangan</button>
+          <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}">+ Baris</button>
         </div>
       </td>
       <td>
         <div class="row-actions">
-          <button data-action="delblock" data-block="${bIdx}" title="Hapus rangkaian ini">Hapus</button>
+          <button data-action="delblock" data-form="${fIdx}" data-block="${bIdx}">Hapus</button>
         </div>
       </td>
     `;
@@ -587,41 +631,49 @@ function render(){
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><span class="auto">${lokoLabels[rIdx]}</span></td>
+        <td><span class="auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${lokoLabels[rIdx]}</span></td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal">
         </td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir">
         </td>
-        <td class="auto-line">${urutText}</td>
+        <td class="auto-line" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${urutText}</td>
         <td>
-          <input class="cell" value="${escapeAttr(row.ket)}" data-block="${bIdx}" data-row="${rIdx}" data-field="ket" placeholder="contoh: AMBIL 9 KRT EX 279">
+          <div class="editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-ketcell="1" data-placeholder="(kosong)">${escapeHtml(row.ket)}</div>
         </td>
         <td class="row-menu-wrap">
-          <button class="row-menu-btn" data-action="togglemenu" data-block="${bIdx}" data-row="${rIdx}">&#8942;</button>
-          <div class="row-menu" data-menu-for="${bIdx}-${rIdx}">
-            <button data-action="insert-above" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di atas</button>
-            <button data-action="insert-below" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di bawah</button>
-            <button data-action="delrow" data-block="${bIdx}" data-row="${rIdx}">Hapus baris ini</button>
+          <button class="row-menu-btn" data-action="togglemenu" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">&#8942;</button>
+          <div class="row-menu" data-menu-for="${fIdx}-${bIdx}-${rIdx}">
+            <button data-action="insert-above" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di atas</button>
+            <button data-action="insert-below" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di bawah</button>
+            <button data-action="delrow" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Hapus baris ini</button>
           </div>
         </td>
       `;
       tbody.appendChild(tr);
     });
   });
-
-  renderSignatures();
-  document.getElementById("inpFootnote").value = state.footnote;
-  saveAll();
 }
 
-function renderMetaInputs(){
-  document.getElementById("inpEmplasemen").value = state.inpEmplasemen;
-  document.getElementById("inpJamMulai").value = state.inpJamMulai;
-  document.getElementById("inpJamSelesai").value = state.inpJamSelesai;
-  document.getElementById("inpNomorUrut").value = state.inpNomorUrut;
-  document.getElementById("inpKtg").value = state.inpKtg;
+function renderSignRow(form, fIdx, tr){
+  tr.innerHTML = "";
+  const names = Object.keys(TTD);
+  ROLES.forEach(role=>{
+    const current = form.signatures[role] || "";
+    const nipp = TTD[current] || "";
+    const options = [`<option value="">— pilih nama —</option>`]
+      .concat(names.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
+      .join("");
+    const td = document.createElement("td");
+    td.innerHTML = `
+      <div class="field-label">Nama:</div>
+      <select data-form="${fIdx}" data-role="${escapeAttr(role)}">${options}</select>
+      <div class="field-label" style="margin-top:4px;">Nipp:</div>
+      <div class="nipp-display">${escapeHtml(nipp)}</div>
+    `;
+    tr.appendChild(td);
+  });
 }
 
 function renderTabs(){
@@ -636,39 +688,25 @@ function renderTabs(){
   });
 }
 
-function renderSignatures(){
-  const tr = document.getElementById("signRow");
-  tr.innerHTML = "";
-  const names = Object.keys(TTD);
-
-  ROLES.forEach(role=>{
-    const current = state.signatures[role] || "";
-    const nipp = TTD[current] || "";
-    const options = [`<option value="">— pilih nama —</option>`]
-      .concat(names.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
-      .join("");
-    const td = document.createElement("td");
-    td.innerHTML = `
-      <div class="field-label">Nama:</div>
-      <select data-role="${escapeAttr(role)}">${options}</select>
-      <div class="field-label" style="margin-top:4px;">Nipp:</div>
-      <input type="text" value="${escapeAttr(nipp)}" readonly data-nipp-for="${escapeAttr(role)}">
-    `;
-    tr.appendChild(td);
-  });
+function renderFormatBarValues(){
+  document.getElementById("globalFontFamily").value = globalFormat.fontFamily;
+  document.getElementById("globalFontSize").value = String(globalFormat.fontSize);
 }
 
-function escapeAttr(s){
-  return String(s ?? "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+function applyColWidths(){
+  const root = document.documentElement.style;
+  root.setProperty("--col-rk", colWidths.rk + "%");
+  root.setProperty("--col-pos", colWidths.pos + "%");
+  root.setProperty("--col-urut", colWidths.urut + "%");
+  root.setProperty("--col-ket", colWidths.ket + "%");
 }
-function escapeHtml(s){
-  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
+
+/* ============== PERSIST ============== */
 
 function saveAll(){
   try{
-    allShifts[activeShift] = state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts }));
+    allShifts[activeShift] = shiftState;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts, globalFormat, colWidths }));
   }catch(e){}
 }
 function loadAll(){
@@ -678,80 +716,143 @@ function loadAll(){
       const parsed = JSON.parse(raw);
       allShifts = parsed.allShifts || {};
       activeShift = parsed.activeShift || "malam";
+      if(parsed.globalFormat) globalFormat = parsed.globalFormat;
+      if(parsed.colWidths) colWidths = parsed.colWidths;
     }
   }catch(e){}
   SHIFTS.forEach(s=>{
-    if(!allShifts[s.id]) allShifts[s.id] = emptyFormState();
-    if(!allShifts[s.id].footnote) allShifts[s.id].footnote = DEFAULT_FOOTNOTE;
+    if(!allShifts[s.id] || !allShifts[s.id].forms){ allShifts[s.id] = emptyShiftState(); }
+    allShifts[s.id].forms.forEach(f=>{ if(!f.footnote) f.footnote = DEFAULT_FOOTNOTE; });
   });
-  state = allShifts[activeShift];
+  shiftState = allShifts[activeShift];
 }
-
 function switchShift(shiftId){
   activeShift = shiftId;
-  state = allShifts[activeShift];
+  shiftState = allShifts[activeShift];
   render();
 }
 
-// ---- event: tab klik ----
+/* ============== EVENTS: tabs & format bar ============== */
+
 document.getElementById("shiftTabs").addEventListener("click", e=>{
   const tab = e.target.closest(".shift-tab");
   if(!tab) return;
   switchShift(tab.dataset.shift);
 });
 
-// ---- event: meta inputs ----
-["inpEmplasemen","inpJamMulai","inpJamSelesai","inpNomorUrut","inpKtg"].forEach(id=>{
-  document.getElementById(id).addEventListener("input", (e)=>{
-    state[id] = e.target.value;
-    renderNomorSurat();
-    saveAll();
-  });
+document.getElementById("globalFontFamily").addEventListener("change", e=>{
+  globalFormat.fontFamily = e.target.value;
+  render();
+});
+document.getElementById("globalFontSize").addEventListener("change", e=>{
+  globalFormat.fontSize = parseFloat(e.target.value);
+  render();
 });
 
-document.getElementById("inpFootnote").addEventListener("input", e=>{
-  state.footnote = e.target.value;
-  saveAll();
-});
+/* ============== EVENTS: form-level (meta inputs) ============== */
 
-// ---- event delegation tbody ----
-document.getElementById("tbody").addEventListener("input", e=>{
+document.getElementById("formsContainer").addEventListener("input", e=>{
   const t = e.target;
-  const field = t.dataset.field;
-  if(!field) return;
-  const bIdx = parseInt(t.dataset.block,10);
 
-  if(field === "name"){
-    state.blocks[bIdx].name = t.value;
+  // meta input (emplasemen, jam, nomor urut, kode)
+  if(t.dataset.metafield){
+    const fIdx = parseInt(t.dataset.form,10);
+    shiftState.forms[fIdx][t.dataset.metafield] = t.value;
+    // update nomor surat tampilan tanpa full re-render (cari elemen .nomor terdekat)
+    const sheetEl = t.closest(".sheet");
+    if(sheetEl){
+      sheetEl.querySelector(".nomor").textContent = formatNomorSurat(shiftState.forms[fIdx]);
+    }
     saveAll();
     return;
   }
 
-  if(t.dataset.row !== undefined){
+  // input posisi awal/akhir (override manual)
+  if(t.dataset.field){
+    const fIdx = parseInt(t.dataset.form,10);
+    const bIdx = parseInt(t.dataset.block,10);
     const rIdx = parseInt(t.dataset.row,10);
-    const block = state.blocks[bIdx];
-    block.rows[rIdx][field] = t.value;
-
-    if(field === "posAkhir"){
-      // posisi akhir berubah -> rantai posisi awal baris setelahnya ikut berubah
+    const block = shiftState.forms[fIdx].blocks[bIdx];
+    block.rows[rIdx][t.dataset.field] = t.value;
+    if(t.dataset.field === "posAkhir"){
       recomputeChain(block.rows, block.posisiAwalPertama);
     }
-    // jika field 'ket' atau 'posAwal' (override manual), tidak perlu recompute chain penuh,
-    // tapi tetap simpan & re-render supaya LOKO, judul, dan urutan rute update.
-    const focusInfo = {field, bIdx, rIdx: t.dataset.row, selStart: t.selectionStart};
+    const focusInfo = {selector: `[data-field="${t.dataset.field}"][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${rIdx}"]`, selStart: t.selectionStart};
     render();
-    restoreFocus(focusInfo);
+    restoreFocusBySelector(focusInfo);
+    return;
   }
 });
 
-function restoreFocus(info){
-  let selector;
-  if(info.rIdx !== undefined){
-    selector = `[data-field="${info.field}"][data-block="${info.bIdx}"][data-row="${info.rIdx}"]`;
-  } else {
-    selector = `[data-field="${info.field}"][data-block="${info.bIdx}"]`;
+// contenteditable: ketcell, blockname, footnote -> pakai event 'input' juga (kontenteditable trigger ini)
+document.getElementById("formsContainer").addEventListener("input", e=>{
+  const t = e.target;
+  if(t.dataset.ketcell !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    const bIdx = parseInt(t.dataset.block,10);
+    const rIdx = parseInt(t.dataset.row,10);
+    const block = shiftState.forms[fIdx].blocks[bIdx];
+    block.rows[rIdx].ket = t.innerText.replace(/\n+$/,"");
+    // update LOKO label & judul blok & urutText tanpa full rerender (supaya kursor contenteditable tidak lompat)
+    updateDerivedDisplaysOnly(fIdx, bIdx);
+    saveAll();
+    return;
   }
-  const el = document.querySelector(selector);
+  if(t.dataset.blockname !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    const bIdx = parseInt(t.dataset.block,10);
+    shiftState.forms[fIdx].blocks[bIdx].name = t.innerText;
+    saveAll();
+    return;
+  }
+  if(t.dataset.foot !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    shiftState.forms[fIdx].footnote = t.innerText;
+    saveAll();
+    return;
+  }
+});
+
+// update LOKO + judul blok di DOM tanpa re-render total (supaya caret contenteditable tetap di tempat)
+function updateDerivedDisplaysOnly(fIdx, bIdx){
+  const block = shiftState.forms[fIdx].blocks[bIdx];
+  const lokoLabels = computeLokoLabels(block.rows);
+  const title = blockTitle(block.rows);
+
+  const tbody = document.querySelector(`[data-tbody-for="${fIdx}"]`);
+  if(!tbody) return;
+  // cari semua tr di tbody, hitung berdasar urutan blok
+  const trs = Array.from(tbody.children);
+  let cursor = 0, blockCount = 0;
+  for(let i=0;i<trs.length;i++){
+    if(trs[i].classList.contains("block-header")){
+      if(blockCount === bIdx){
+        const titleCell = trs[i].querySelector(".block-title-auto");
+        if(titleCell) titleCell.innerHTML = title || "<span class='hint'>belum ada keterangan</span>";
+      }
+      if(blockCount === bIdx+1) break;
+      blockCount++;
+      cursor = 0;
+      continue;
+    }
+    if(blockCount === bIdx){
+      const autoSpan = trs[i].querySelector(".auto");
+      if(autoSpan && lokoLabels[cursor] !== undefined) autoSpan.textContent = lokoLabels[cursor];
+      const urutCell = trs[i].querySelector(".auto-line");
+      if(urutCell){
+        const row = block.rows[cursor];
+        const rute = lookupRute(row.posAwal, row.posAkhir);
+        urutCell.innerHTML = rute
+          ? `${rute.urut}${rute.wesel ? " (W: "+rute.wesel.trim()+")" : ""}`
+          : (row.posAwal || row.posAkhir ? "<span class='warn-text'>kombinasi posisi belum ada di tabel RUTE</span>" : "");
+      }
+      cursor++;
+    }
+  }
+}
+
+function restoreFocusBySelector(info){
+  const el = document.querySelector(info.selector);
   if(el){
     el.focus();
     if(typeof info.selStart === "number" && el.setSelectionRange){
@@ -760,26 +861,51 @@ function restoreFocus(info){
   }
 }
 
-document.getElementById("tbody").addEventListener("click", e=>{
+/* ============== EVENTS: clicks (buttons, menus) ============== */
+
+document.getElementById("formsContainer").addEventListener("click", e=>{
   const t = e.target.closest("button");
   if(!t) return;
   const action = t.dataset.action;
   if(!action) return;
-  const bIdx = parseInt(t.dataset.block,10);
-  const block = state.blocks[bIdx];
 
   closeAllRowMenus();
 
-  if(action === "togglemenu"){
-    const menu = document.querySelector(`[data-menu-for="${t.dataset.block}-${t.dataset.row}"]`);
-    if(menu){ menu.classList.toggle("open"); }
+  if(action === "delform"){
+    const fIdx = parseInt(t.dataset.form,10);
+    if(shiftState.forms.length>1){
+      if(confirm(`Hapus Form ${fIdx+1} dari shift ini?`)){
+        shiftState.forms.splice(fIdx,1);
+        render();
+      }
+    }
     return;
   }
 
-  if(action === "editket"){
-    openModal(bIdx);
+  const fIdx = parseInt(t.dataset.form,10);
+  const form = shiftState.forms[fIdx];
+
+  if(action === "addblock"){
+    let defaultPosAwal = "";
+    const lastBlock = form.blocks[form.blocks.length-1];
+    if(lastBlock && lastBlock.rows && lastBlock.rows.length>0){
+      defaultPosAwal = lastBlock.rows[lastBlock.rows.length-1].posAkhir;
+    }
+    form.blocks.push({ name: "RANGKAIAN BARU", posisiAwalPertama: defaultPosAwal, rows: [] });
+    render();
     return;
   }
+
+  const bIdx = parseInt(t.dataset.block,10);
+  if(bIdx === undefined || isNaN(bIdx)) return;
+  const block = form.blocks[bIdx];
+
+  if(action === "togglemenu"){
+    const menu = document.querySelector(`[data-menu-for="${t.dataset.form}-${t.dataset.block}-${t.dataset.row}"]`);
+    if(menu){ menu.classList.toggle("open"); }
+    return;
+  }
+  if(action === "editket"){ openModal(fIdx, bIdx); return; }
 
   if(action === "addrow-end"){
     block.rows.push({posAwal:"", posAkhir:"", ket:""});
@@ -797,65 +923,44 @@ document.getElementById("tbody").addEventListener("click", e=>{
     block.rows.splice(rIdx,1);
     recomputeChain(block.rows, block.posisiAwalPertama);
   } else if(action === "delblock"){
-    if(state.blocks.length>1){
-      state.blocks.splice(bIdx,1);
-    } else {
-      alert("Minimal harus ada satu rangkaian.");
-      return;
-    }
+    if(form.blocks.length>1){ form.blocks.splice(bIdx,1); }
+    else { alert("Minimal harus ada satu rangkaian."); return; }
   }
   render();
 });
 
-function closeAllRowMenus(){
-  document.querySelectorAll(".row-menu.open").forEach(m=>m.classList.remove("open"));
-}
+function closeAllRowMenus(){ document.querySelectorAll(".row-menu.open").forEach(m=>m.classList.remove("open")); }
 document.addEventListener("click", e=>{
-  if(!e.target.closest(".row-menu-wrap")){
-    closeAllRowMenus();
+  if(!e.target.closest(".row-menu-wrap")) closeAllRowMenus();
+});
+
+document.getElementById("formsContainer").addEventListener("change", e=>{
+  const t = e.target;
+  if(t.dataset.role !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    shiftState.forms[fIdx].signatures[t.dataset.role] = t.value;
+    render();
   }
 });
 
-document.getElementById("signRow").addEventListener("change", e=>{
-  const role = e.target.dataset.role;
-  if(role !== undefined){
-    state.signatures[role] = e.target.value;
-    renderSignatures();
-    saveAll();
-  }
-});
-
-document.getElementById("btnAddBlock").addEventListener("click", ()=>{
-  let defaultPosAwal = "";
-  const lastBlock = state.blocks[state.blocks.length-1];
-  if(lastBlock && lastBlock.rows && lastBlock.rows.length>0){
-    defaultPosAwal = lastBlock.rows[lastBlock.rows.length-1].posAkhir;
-  }
-  state.blocks.push({
-    name: "RANGKAIAN BARU",
-    posisiAwalPertama: defaultPosAwal,
-    rows: []
-  });
+document.getElementById("btnAddForm").addEventListener("click", ()=>{
+  shiftState.forms.push(emptyFormState());
   render();
 });
 
 document.getElementById("btnReset").addEventListener("click", ()=>{
   const label = SHIFTS.find(s=>s.id===activeShift).label;
   if(confirm(`Reset seluruh isi form untuk "${label}" ke kondisi kosong?`)){
-    allShifts[activeShift] = emptyFormState();
-    state = allShifts[activeShift];
+    allShifts[activeShift] = emptyShiftState();
+    shiftState = allShifts[activeShift];
     render();
   }
 });
 
-document.getElementById("btnPrint").addEventListener("click", ()=>{
-  window.print();
-});
+document.getElementById("btnPrint").addEventListener("click", ()=>{ window.print(); });
 
-// ---- Export / Import JSON per shift ----
 document.getElementById("btnExportShift").addEventListener("click", ()=>{
-  const label = SHIFTS.find(s=>s.id===activeShift).label;
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const blob = new Blob([JSON.stringify(shiftState, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   const d = new Date();
@@ -867,10 +972,7 @@ document.getElementById("btnExportShift").addEventListener("click", ()=>{
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 });
-
-document.getElementById("btnImportShift").addEventListener("click", ()=>{
-  document.getElementById("fileImport").click();
-});
+document.getElementById("btnImportShift").addEventListener("click", ()=>{ document.getElementById("fileImport").click(); });
 document.getElementById("fileImport").addEventListener("change", (e)=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -878,22 +980,21 @@ document.getElementById("fileImport").addEventListener("change", (e)=>{
   reader.onload = (ev)=>{
     try{
       const parsed = JSON.parse(ev.target.result);
-      if(!parsed.blocks){ throw new Error("format tidak sesuai"); }
+      if(!parsed.forms){ throw new Error("format tidak sesuai (tidak ada 'forms')"); }
       allShifts[activeShift] = parsed;
-      state = allShifts[activeShift];
+      shiftState = allShifts[activeShift];
       render();
-    }catch(err){
-      alert("Gagal membaca file JSON: " + err.message);
-    }
+    }catch(err){ alert("Gagal membaca file JSON: " + err.message); }
   };
   reader.readAsText(file);
   e.target.value = "";
 });
 
-// ---- Modal Edit Keterangan (draggable) ----
-function openModal(blockIndex){
-  modalCtx.blockIndex = blockIndex;
-  const block = state.blocks[blockIndex];
+/* ============== Modal Edit Keterangan (draggable) ============== */
+
+function openModal(formIndex, blockIndex){
+  modalCtx = { formIndex, blockIndex };
+  const block = shiftState.forms[formIndex].blocks[blockIndex];
   document.getElementById("modalTitle").textContent = "Edit Keterangan — " + (block.name || "Rangkaian");
   document.getElementById("modalTextarea").value = rowsToText(block.rows);
   document.getElementById("modalPosAwal").value = block.posisiAwalPertama || "";
@@ -904,92 +1005,180 @@ function openModal(blockIndex){
 function closeModal(){
   document.getElementById("modalOverlay").classList.remove("open");
   document.getElementById("modalBox").classList.remove("open");
-  modalCtx.blockIndex = null;
+  modalCtx = { formIndex: null, blockIndex: null };
 }
 function resetModalPosition(){
   const box = document.getElementById("modalBox");
-  box.style.top = "90px";
-  box.style.left = "50%";
-  box.style.transform = "translateX(-50%)";
+  box.style.top = "90px"; box.style.left = "50%"; box.style.transform = "translateX(-50%)";
 }
-
 document.getElementById("modalClose").addEventListener("click", closeModal);
 document.getElementById("modalOverlay").addEventListener("click", closeModal);
-
 document.getElementById("modalApply").addEventListener("click", ()=>{
-  if(modalCtx.blockIndex === null) return;
-  const block = state.blocks[modalCtx.blockIndex];
+  if(modalCtx.formIndex === null) return;
+  const form = shiftState.forms[modalCtx.formIndex];
+  const block = form.blocks[modalCtx.blockIndex];
   const posAwal = document.getElementById("modalPosAwal").value.trim();
   const text = document.getElementById("modalTextarea").value;
   block.posisiAwalPertama = posAwal;
   block.rows = textToRows(text, posAwal);
 
-  // auto-isi posisi awal blok berikutnya dari posisi akhir terakhir blok ini, jika kosong
-  const nextBlock = state.blocks[modalCtx.blockIndex+1];
+  const nextBlock = form.blocks[modalCtx.blockIndex+1];
   if(nextBlock && block.rows.length>0 && !nextBlock.posisiAwalPertama){
     nextBlock.posisiAwalPertama = block.rows[block.rows.length-1].posAkhir;
   }
-
   closeModal();
   render();
 });
 
-document.getElementById("modalPosAwal").addEventListener("input", ()=>{
-  // live preview tidak wajib; cukup terapkan saat klik tombol Terapkan
-});
-
-// drag logic
 (function setupDrag(){
   const head = document.getElementById("modalHead");
   const box = document.getElementById("modalBox");
   let dragging = false, offsetX = 0, offsetY = 0;
-
   head.addEventListener("mousedown", (e)=>{
     dragging = true;
     const rect = box.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
-    box.style.transform = "none";
-    box.style.left = rect.left + "px";
-    box.style.top = rect.top + "px";
+    offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
+    box.style.transform = "none"; box.style.left = rect.left + "px"; box.style.top = rect.top + "px";
     e.preventDefault();
   });
   document.addEventListener("mousemove", (e)=>{
     if(!dragging) return;
-    let x = e.clientX - offsetX;
-    let y = e.clientY - offsetY;
-    x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, x));
-    y = Math.max(0, Math.min(window.innerHeight - 40, y));
-    box.style.left = x + "px";
-    box.style.top = y + "px";
+    let x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, e.clientX - offsetX));
+    let y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - offsetY));
+    box.style.left = x + "px"; box.style.top = y + "px";
   });
   document.addEventListener("mouseup", ()=>{ dragging = false; });
-
-  // touch support
   head.addEventListener("touchstart", (e)=>{
-    const touch = e.touches[0];
-    dragging = true;
+    const touch = e.touches[0]; dragging = true;
     const rect = box.getBoundingClientRect();
-    offsetX = touch.clientX - rect.left;
-    offsetY = touch.clientY - rect.top;
-    box.style.transform = "none";
-    box.style.left = rect.left + "px";
-    box.style.top = rect.top + "px";
+    offsetX = touch.clientX - rect.left; offsetY = touch.clientY - rect.top;
+    box.style.transform = "none"; box.style.left = rect.left + "px"; box.style.top = rect.top + "px";
   }, {passive:true});
   document.addEventListener("touchmove", (e)=>{
     if(!dragging) return;
     const touch = e.touches[0];
-    let x = touch.clientX - offsetX;
-    let y = touch.clientY - offsetY;
-    x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, x));
-    y = Math.max(0, Math.min(window.innerHeight - 40, y));
-    box.style.left = x + "px";
-    box.style.top = y + "px";
+    let x = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, touch.clientX - offsetX));
+    let y = Math.max(0, Math.min(window.innerHeight - 40, touch.clientY - offsetY));
+    box.style.left = x + "px"; box.style.top = y + "px";
   }, {passive:true});
   document.addEventListener("touchend", ()=>{ dragging = false; });
 })();
 
-// ---- init ----
+/* ============== Floating font toolbar (blok teks manual) ============== */
+
+(function setupFloatToolbar(){
+  const toolbar = document.getElementById("floatToolbar");
+  const selFamily = document.getElementById("ftFontFamily");
+  const selSize = document.getElementById("ftFontSize");
+  let savedRange = null;
+
+  function isInsideEditable(node){
+    return !!(node && node.nodeType && (node.closest ? node.closest(".editable-cell, .block-name-edit, .footnote-edit") : node.parentElement && node.parentElement.closest(".editable-cell, .block-name-edit, .footnote-edit")));
+  }
+
+  document.addEventListener("selectionchange", ()=>{
+    try{
+      const sel = window.getSelection();
+      if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
+        toolbar.classList.remove("open");
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      const editableHost = container.nodeType === 1 ? container.closest(".editable-cell, .block-name-edit, .footnote-edit") : container.parentElement && container.parentElement.closest(".editable-cell, .block-name-edit, .footnote-edit");
+      if(!editableHost){
+        toolbar.classList.remove("open");
+        return;
+      }
+      savedRange = range.cloneRange();
+      const rect = range.getBoundingClientRect ? range.getBoundingClientRect() : null;
+      if(!rect || (rect.width === 0 && rect.height === 0)){ toolbar.classList.remove("open"); return; }
+      toolbar.style.left = Math.max(4, rect.left) + "px";
+      toolbar.style.top = Math.max(4, rect.top - 42) + "px";
+      toolbar.classList.add("open");
+    }catch(err){
+      toolbar.classList.remove("open");
+    }
+  });
+
+  function applyStyleToSelection(styleProp, value){
+    if(!savedRange) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+
+    const span = document.createElement("span");
+    span.style[styleProp] = value;
+
+    // bungkus seleksi dengan span baru (pendekatan sederhana: surroundContents kalau memungkinkan)
+    try{
+      savedRange.surroundContents(span);
+    }catch(e){
+      // fallback: extract & re-insert (untuk seleksi lintas beberapa node)
+      const frag = savedRange.extractContents();
+      span.appendChild(frag);
+      savedRange.insertNode(span);
+    }
+
+    // trigger input event manual supaya state ke-update
+    const host = span.closest(".editable-cell, .block-name-edit, .footnote-edit");
+    if(host){
+      host.dispatchEvent(new Event("input", {bubbles:true}));
+    }
+    toolbar.classList.remove("open");
+  }
+
+  selFamily.addEventListener("mousedown", e=>e.preventDefault()); // jaga selection
+  selFamily.addEventListener("change", ()=>{ applyStyleToSelection("fontFamily", selFamily.value); });
+  selSize.addEventListener("mousedown", e=>e.preventDefault());
+  selSize.addEventListener("change", ()=>{ applyStyleToSelection("fontSize", selSize.value+"px"); });
+
+  // jangan tutup toolbar saat klik di dalam toolbar itu sendiri
+  toolbar.addEventListener("mousedown", e=>{ e.stopPropagation(); });
+})();
+
+/* ============== Resize kolom (drag header) ============== */
+
+(function setupColResize(){
+  let resizing = null;
+  document.addEventListener("mousedown", e=>{
+    const handle = e.target.closest(".col-resizer");
+    if(!handle) return;
+    const th = handle.closest("th");
+    const table = th.closest("table");
+    resizing = {
+      key: handle.dataset.colkey,
+      startX: e.clientX,
+      tableWidth: table.getBoundingClientRect().width,
+      startWidths: { ...colWidths }
+    };
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!resizing) return;
+    const deltaPx = e.clientX - resizing.startX;
+    const deltaPct = (deltaPx / resizing.tableWidth) * 100;
+
+    if(resizing.key === "rk"){
+      colWidths.rk = clampPct(resizing.startWidths.rk + deltaPct);
+    } else if(resizing.key === "pos1"){
+      colWidths.pos = clampPct(resizing.startWidths.pos + deltaPct);
+    } else if(resizing.key === "pos2"){
+      colWidths.pos = clampPct(resizing.startWidths.pos + deltaPct);
+    } else if(resizing.key === "urut"){
+      colWidths.urut = clampPct(resizing.startWidths.urut + deltaPct);
+    } else if(resizing.key === "ket"){
+      colWidths.ket = clampPct(resizing.startWidths.ket + deltaPct);
+    }
+    applyColWidths();
+  });
+  document.addEventListener("mouseup", ()=>{
+    if(resizing){ resizing = null; saveAll(); }
+  });
+  function clampPct(v){ return Math.max(4, Math.min(60, v)); }
+})();
+
+/* ============== init ============== */
 loadAll();
 render();
 </script>
