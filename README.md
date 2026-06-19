@@ -20,9 +20,9 @@ Download `index.html`, lalu klik dua kali untuk membuka di browser.
 - **Export / Import JSON per shift** — menyimpan seluruh form dalam satu shift ke satu file `.json`.
 
 ### Pengisian data
-- **Nomor surat & Hari/Tanggal otomatis** per form (`NOMOR: 13/KTG/VI/2026`, `KAMIS/18-06-2026`).
-- **Edit Keterangan via popup yang bisa digeser** — tombol "Edit Keterangan" di tiap rangkaian membuka kotak tempel/ketik massal (mis. hasil copy dari simulator). Tabel utama tetap tampil rapi seperti spreadsheet asli.
-- **Kolom Keterangan, Posisi Awal, Posisi Akhir, dan nama rangkaian bisa diedit langsung di tabel** — tersinkron dua arah dengan popup; perubahan terakhir yang dipakai.
+- **Nomor surat & Hari/Tanggal otomatis** per form (`NOMOR: 13/KTG/VI/2026`, `KAMIS/18-06-2026`), dengan **panah maju/mundur 1 hari** di sebelah tanggal — berguna kalau satu lembar form dibuat untuk beberapa hari ke depan sekaligus (form 1 = hari ini, form 2 = besok, dst).
+- **Edit Keterangan via popup yang bisa digeser** — tombol hijau "Edit Keterangan" di tiap rangkaian membuka kotak tempel/ketik massal (mis. hasil copy dari simulator). Tabel utama tetap tampil rapi seperti spreadsheet asli.
+- **Kolom Keterangan, Posisi Awal, Posisi Akhir, dan nama rangkaian bisa diedit langsung di tabel** — tersinkron dua arah dengan popup; perubahan terakhir yang dipakai. Tekan **Enter** di kolom Keterangan untuk pindah ke baris bawah; kalau baris bawah belum ada, akan dibuat otomatis dan kursor langsung pindah ke sana.
 - **Sisip / hapus baris manual** lewat menu titik-tiga di tiap baris (sisip di atas/bawah, atau hapus). Berguna untuk kombinasi posisi yang belum ada di tabel RUTE.
 - **Hitung jumlah kereta otomatis (LOKO + n KERETA)** dari teks `AMBIL n KRT`, `LEPAS n KRT`, atau `LEPAS SEMUA`.
 - **Judul rangkaian otomatis**, dihitung dari posisi yang punya keterangan ambil/lepas saja.
