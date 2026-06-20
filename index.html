@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -35,8 +36,11 @@
   button.success{ background:#1f7a3d; border-color:#1f7a3d; color:#fff; }
   button.ghost{ background:transparent; }
   button.small{ padding:3px 8px; font-size:11px; }
+  button.tiny{ padding:2px 7px; font-size:9.5px; border-color:var(--muted); color:var(--muted); }
   button:hover{ opacity:.85; }
   button:active{ transform:translateY(1px); }
+  button:disabled{ opacity:.35; cursor:not-allowed; }
+  button:disabled:hover{ opacity:.35; }
 
   .shift-tab-bar{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:8px; margin-bottom:0; }
   .shift-tabs{ display:flex; gap:0; border-bottom:2px solid var(--ink); }
@@ -203,9 +207,11 @@
       <div class="sub">Klik "Edit Keterangan" untuk paste massal dari simulator. Blok teks manual (nama rangkaian, keterangan, catatan kaki) untuk ubah font/ukuran. Geser tepi kolom header untuk atur lebar.</div>
     </div>
     <div class="btns">
+      <button id="btnUndo" class="small ghost" title="Urungkan (Ctrl+Z)" disabled>&#8630; Undo</button>
+      <button id="btnRedo" class="small ghost" title="Ulangi (Ctrl+Y)" disabled>&#8631; Redo</button>
       <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
-      <button id="btnExportShift">Export JSON (shift ini)</button>
-      <button id="btnImportShift">Import JSON (shift ini)</button>
+      <button id="btnExportShift" class="tiny ghost">Export</button>
+      <button id="btnImportShift" class="tiny ghost">Import</button>
       <input type="file" id="fileImport" accept=".json" style="display:none">
     </div>
   </div>
@@ -426,6 +432,69 @@ let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 11.5 };
 let colWidths = { rk:13, pos:8.5, urut:27, ket:23 }; // persen
 
+// ---- Undo/Redo ----
+let history = [];
+let historyIndex = -1;
+const MAX_HISTORY = 60;
+let isRestoringHistory = false; // flag supaya restore tidak ikut ke-push lagi ke history
+let debounceTimer = null;
+
+function pushHistory(){
+  if(isRestoringHistory) return;
+  const snapshot = JSON.stringify({ activeShift, allShifts });
+  // hindari duplikat berurutan (kalau tidak ada perubahan nyata)
+  if(history[historyIndex] === snapshot) return;
+  history = history.slice(0, historyIndex+1);
+  history.push(snapshot);
+  if(history.length > MAX_HISTORY) history.shift();
+  historyIndex = history.length - 1;
+  updateUndoRedoButtons();
+}
+function pushHistoryDebounced(){
+  if(isRestoringHistory) return;
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(()=>{ pushHistory(); }, 500);
+}
+function flushPendingHistory(){
+  if(debounceTimer){
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+    pushHistory();
+  }
+}
+function doUndo(){
+  flushPendingHistory();
+  if(historyIndex <= 0) return;
+  historyIndex--;
+  restoreFromHistory(history[historyIndex]);
+}
+function doRedo(){
+  flushPendingHistory();
+  if(historyIndex >= history.length-1) return;
+  historyIndex++;
+  restoreFromHistory(history[historyIndex]);
+}
+function restoreFromHistory(snapshotStr){
+  try{
+    const parsed = JSON.parse(snapshotStr);
+    isRestoringHistory = true;
+    activeShift = parsed.activeShift;
+    allShifts = parsed.allShifts;
+    shiftState = allShifts[activeShift];
+    render();
+    isRestoringHistory = false;
+    updateUndoRedoButtons();
+  }catch(e){
+    isRestoringHistory = false;
+  }
+}
+function updateUndoRedoButtons(){
+  const btnUndo = document.getElementById("btnUndo");
+  const btnRedo = document.getElementById("btnRedo");
+  if(btnUndo) btnUndo.disabled = historyIndex <= 0;
+  if(btnRedo) btnRedo.disabled = historyIndex >= history.length-1;
+}
+
 let modalCtx = { formIndex: null, blockIndex: null };
 
 function buildRuteIndex(){
@@ -458,19 +527,32 @@ function formatHariTanggal(offsetDays){
 }
 
 // ---- rows <-> text ----
+// CATATAN STRUKTUR (revisi): row.ket sekarang menyimpan TEKS LENGKAP "LABEL: teks" (apa adanya, termasuk label & titik dua).
+// Posisi Akhir (row.posAkhir) DITURUNKAN dari row.ket lewat extractLabelFromKet().
+// Kalau row.ket tidak punya format "LABEL:", posisi akhir baris itu dikosongkan otomatis.
+function extractLabelFromKet(ketFull){
+  const s = String(ketFull || "");
+  const colonIdx = s.indexOf(":");
+  if(colonIdx === -1) return "";
+  return s.slice(0, colonIdx).trim();
+}
+function extractTextAfterLabel(ketFull){
+  const s = String(ketFull || "");
+  const colonIdx = s.indexOf(":");
+  if(colonIdx === -1) return s.trim();
+  return s.slice(colonIdx+1).trim();
+}
+
 function rowsToText(rows){
-  return rows.map(r => (r.ket && r.ket.trim()!=="") ? `${r.posAkhir}: ${r.ket}` : `${r.posAkhir}:`).join("\n");
+  return rows.map(r => r.ket || "").join("\n");
 }
 function textToRows(text, posisiAwalPertama){
   const lines = String(text||"").split("\n").map(l=>l.trim()).filter(l=>l.length>0);
   const rows = [];
   let prevPos = posisiAwalPertama || "";
   lines.forEach(line=>{
-    const colonIdx = line.indexOf(":");
-    let label, ket;
-    if(colonIdx === -1){ label = line.trim(); ket = ""; }
-    else { label = line.slice(0, colonIdx).trim(); ket = line.slice(colonIdx+1).trim(); }
-    rows.push({ posAwal: prevPos, posAkhir: label, ket: ket });
+    const label = extractLabelFromKet(line);
+    rows.push({ posAwal: prevPos, posAkhir: label, ket: line });
     prevPos = label;
   });
   return rows;
@@ -484,7 +566,7 @@ function recomputeChain(rows, posisiAwalPertama){
 function computeLokoLabels(rows){
   let prevTotal = 0;
   return rows.map(r=>{
-    const ket = (r.ket || "").toUpperCase();
+    const ket = extractTextAfterLabel(r.ket).toUpperCase();
     let ambil = 0, lepas = 0, lepasSemua = false;
     const mAmbil = ket.match(/AMBIL\s+(\d+)\s*KRT/);
     if(mAmbil) ambil = parseInt(mAmbil[1],10);
@@ -497,7 +579,7 @@ function computeLokoLabels(rows){
   });
 }
 function blockTitle(rows){
-  const withKet = rows.filter(r => r.ket && r.ket.trim() !== "");
+  const withKet = rows.filter(r => extractTextAfterLabel(r.ket).trim() !== "");
   if(withKet.length === 0) return "";
   return withKet.map(r => r.posAkhir).join("-") + ` (${withKet.length})`;
 }
@@ -520,6 +602,11 @@ function render(){
   });
 
   saveAll();
+  // render() selalu dipicu oleh aksi diskrit (klik tombol, generate popup, ganti tab, dll)
+  // ATAU oleh restoreFromHistory() sendiri. Push history langsung di sini (bukan debounced),
+  // supaya undo langsung setelah klik tombol tetap akurat. restoreFromHistory sudah dijaga
+  // flag isRestoringHistory supaya tidak ikut ke-push lagi.
+  pushHistory();
 }
 
 function renderForm(form, fIdx){
@@ -626,7 +713,7 @@ function renderTbody(form, fIdx, tbody){
       <td colspan="2">
         <div class="row-actions">
           <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}" class="success">Edit Keterangan</button>
-          <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}">+ Baris</button>
+          <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}" class="success">+ Baris</button>
         </div>
       </td>
       <td>
@@ -647,17 +734,17 @@ function renderTbody(form, fIdx, tbody){
       tr.innerHTML = `
         <td><span class="auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${lokoLabels[rIdx]}</span></td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal" data-navcol="0">
         </td>
         <td class="col-pos">
-          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir">
+          <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir" data-navcol="1">
         </td>
         <td class="auto-line" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${urutText}</td>
         <td>
-          <div class="editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-ketcell="1" data-placeholder="(kosong)">${escapeHtml(row.ket)}</div>
+          <div class="editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-ketcell="1" data-placeholder="contoh: C1: AMBIL 9 KRT EX 279" data-navcol="2">${escapeHtml(row.ket)}</div>
         </td>
         <td class="row-menu-wrap">
-          <button class="row-menu-btn" data-action="togglemenu" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">&#8942;</button>
+          <button class="row-menu-btn" data-action="togglemenu" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-navcol="3">&#8942;</button>
           <div class="row-menu" data-menu-for="${fIdx}-${bIdx}-${rIdx}">
             <button data-action="insert-above" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di atas</button>
             <button data-action="insert-below" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di bawah</button>
@@ -778,6 +865,7 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
       sheetEl.querySelector(".nomor").textContent = formatNomorSurat(shiftState.forms[fIdx]);
     }
     saveAll();
+    pushHistoryDebounced();
     return;
   }
 
@@ -806,10 +894,28 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
     const bIdx = parseInt(t.dataset.block,10);
     const rIdx = parseInt(t.dataset.row,10);
     const block = shiftState.forms[fIdx].blocks[bIdx];
-    block.rows[rIdx].ket = t.textContent.replace(/\n+$/,"");
+    const rawText = t.textContent.replace(/\n+$/,"");
+    const newPosAkhir = extractLabelFromKet(rawText);
+
+    const posAkhirChanged = block.rows[rIdx].posAkhir !== newPosAkhir;
+    block.rows[rIdx].ket = rawText;
+    block.rows[rIdx].posAkhir = newPosAkhir;
+
+    if(posAkhirChanged){
+      recomputeChain(block.rows, block.posisiAwalPertama);
+      // update kolom Posisi Awal/Akhir di DOM (input biasa) tanpa kehilangan fokus contenteditable
+      block.rows.forEach((row, idx)=>{
+        const posAwalInput = document.querySelector(`input[data-field="posAwal"][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${idx}"]`);
+        if(posAwalInput) posAwalInput.value = row.posAwal;
+        const posAkhirInput = document.querySelector(`input[data-field="posAkhir"][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${idx}"]`);
+        if(posAkhirInput) posAkhirInput.value = row.posAkhir;
+      });
+    }
+
     // update LOKO label & judul blok & urutText tanpa full rerender (supaya kursor contenteditable tidak lompat)
     updateDerivedDisplaysOnly(fIdx, bIdx);
     saveAll();
+    pushHistoryDebounced();
     return;
   }
   if(t.dataset.blockname !== undefined){
@@ -817,12 +923,14 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
     const bIdx = parseInt(t.dataset.block,10);
     shiftState.forms[fIdx].blocks[bIdx].name = t.textContent;
     saveAll();
+    pushHistoryDebounced();
     return;
   }
   if(t.dataset.foot !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
     shiftState.forms[fIdx].footnote = t.textContent;
     saveAll();
+    pushHistoryDebounced();
     return;
   }
 });
@@ -840,11 +948,23 @@ document.getElementById("formsContainer").addEventListener("keydown", e=>{
   const block = shiftState.forms[fIdx].blocks[bIdx];
 
   // pastikan perubahan ketik terakhir di baris ini sudah tersimpan sebelum pindah
-  block.rows[rIdx].ket = t.textContent.replace(/\n+$/,"");
+  const rawText = t.textContent.replace(/\n+$/,"");
+  const newPosAkhir = extractLabelFromKet(rawText);
+  const posAkhirChanged = block.rows[rIdx].posAkhir !== newPosAkhir;
+  block.rows[rIdx].ket = rawText;
+  block.rows[rIdx].posAkhir = newPosAkhir;
+  if(posAkhirChanged){
+    recomputeChain(block.rows, block.posisiAwalPertama);
+  }
 
   if(rIdx + 1 < block.rows.length){
-    // baris bawah sudah ada -> langsung fokus ke sana
-    saveAll();
+    // baris bawah sudah ada
+    if(posAkhirChanged){
+      render();
+    } else {
+      saveAll();
+      pushHistoryDebounced();
+    }
     focusKetCell(fIdx, bIdx, rIdx+1);
   } else {
     // belum ada baris bawah -> buat baru otomatis lalu fokus ke sana
@@ -872,6 +992,84 @@ function focusKetCell(fIdx, bIdx, rIdx){
   });
 }
 
+// ---- Navigasi panah keyboard antar sel yang bisa diedit (posAwal, posAkhir, Keterangan, menu titik-tiga) ----
+function focusNavCell(fIdx, bIdx, rIdx, navcol){
+  const selector = `[data-navcol="${navcol}"][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${rIdx}"]`;
+  const el = document.querySelector(selector);
+  if(!el) return false;
+  el.focus();
+  if(el.tagName === "INPUT"){
+    el.select();
+  } else if(el.isContentEditable){
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  return true;
+}
+
+function isCaretAtStart(el){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return true;
+  const range = sel.getRangeAt(0);
+  const pre = range.cloneRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(range.startContainer, range.startOffset);
+  return pre.toString().length === 0;
+}
+function isCaretAtEnd(el){
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return true;
+  const range = sel.getRangeAt(0);
+  const post = range.cloneRange();
+  post.selectNodeContents(el);
+  post.setStart(range.endContainer, range.endOffset);
+  return post.toString().length === 0;
+}
+
+document.getElementById("formsContainer").addEventListener("keydown", e=>{
+  const navAttr = e.target.dataset ? e.target.dataset.navcol : undefined;
+  if(navAttr === undefined) return;
+  if(!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) return;
+
+  const t = e.target;
+  const navcol = parseInt(navAttr, 10);
+  const fIdx = parseInt(t.dataset.form, 10);
+  const bIdx = parseInt(t.dataset.block, 10);
+  const rIdx = parseInt(t.dataset.row, 10);
+
+  // untuk kolom teks bebas (input posAwal/posAkhir) maupun contenteditable (ket),
+  // kiri/kanan hanya berpindah kolom kalau kursor sudah di ujung paling awal/akhir,
+  // supaya tidak mengganggu pergerakan kursor normal saat mengedit teks.
+  if(e.key === "ArrowLeft" || e.key === "ArrowRight"){
+    if(t.tagName === "INPUT"){
+      const atStart = t.selectionStart === 0 && t.selectionEnd === 0;
+      const atEnd = t.selectionStart === t.value.length && t.selectionEnd === t.value.length;
+      if(e.key === "ArrowLeft" && !atStart) return;
+      if(e.key === "ArrowRight" && !atEnd) return;
+    } else if(t.isContentEditable){
+      if(e.key === "ArrowLeft" && !isCaretAtStart(t)) return;
+      if(e.key === "ArrowRight" && !isCaretAtEnd(t)) return;
+    }
+  }
+
+  let targetRow = rIdx, targetCol = navcol;
+  if(e.key === "ArrowUp") targetRow = rIdx - 1;
+  if(e.key === "ArrowDown") targetRow = rIdx + 1;
+  if(e.key === "ArrowLeft") targetCol = navcol - 1;
+  if(e.key === "ArrowRight") targetCol = navcol + 1;
+
+  if(targetCol < 0 || targetCol > 3) return; // sudah di kolom paling kiri/kanan, biarkan default (tidak ada aksi)
+
+  const moved = focusNavCell(fIdx, bIdx, targetRow, targetCol);
+  if(moved){
+    e.preventDefault();
+  }
+});
+
 // update LOKO + judul blok di DOM tanpa re-render total (supaya caret contenteditable tetap di tempat)
 function updateDerivedDisplaysOnly(fIdx, bIdx){
   const block = shiftState.forms[fIdx].blocks[bIdx];
@@ -880,21 +1078,20 @@ function updateDerivedDisplaysOnly(fIdx, bIdx){
 
   const tbody = document.querySelector(`[data-tbody-for="${fIdx}"]`);
   if(!tbody) return;
-  // cari semua tr di tbody, hitung berdasar urutan blok
   const trs = Array.from(tbody.children);
-  let cursor = 0, blockCount = 0;
+  let currentBlockIdx = -1; // belum masuk blok manapun
+  let cursor = 0;
   for(let i=0;i<trs.length;i++){
     if(trs[i].classList.contains("block-header")){
-      if(blockCount === bIdx){
+      currentBlockIdx++;
+      cursor = 0;
+      if(currentBlockIdx === bIdx){
         const titleCell = trs[i].querySelector(".block-title-auto");
         if(titleCell) titleCell.innerHTML = title || "<span class='hint'>belum ada keterangan</span>";
       }
-      if(blockCount === bIdx+1) break;
-      blockCount++;
-      cursor = 0;
       continue;
     }
-    if(blockCount === bIdx){
+    if(currentBlockIdx === bIdx){
       const autoSpan = trs[i].querySelector(".auto");
       if(autoSpan && lokoLabels[cursor] !== undefined) autoSpan.textContent = lokoLabels[cursor];
       const urutCell = trs[i].querySelector(".auto-line");
@@ -906,6 +1103,8 @@ function updateDerivedDisplaysOnly(fIdx, bIdx){
           : (row.posAwal || row.posAkhir ? "<span class='warn-text'>kombinasi posisi belum ada di tabel RUTE</span>" : "");
       }
       cursor++;
+    } else if(currentBlockIdx > bIdx){
+      break; // sudah lewat blok yang dicari, tidak perlu lanjut
     }
   }
 }
@@ -950,6 +1149,7 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
     const dateSpan = t.parentElement.querySelector(".date-display");
     if(dateSpan) dateSpan.textContent = formatHariTanggal(form.dateOffsetDays);
     saveAll();
+    pushHistory();
     return;
   }
 
@@ -1255,14 +1455,37 @@ document.getElementById("modalApply").addEventListener("click", ()=>{
     applyColWidths();
   });
   document.addEventListener("mouseup", ()=>{
-    if(resizing){ resizing = null; saveAll(); }
+    if(resizing){ resizing = null; saveAll(); pushHistory(); }
   });
   function clampPct(v){ return Math.max(4, Math.min(60, v)); }
 })();
 
+/* ============== Undo/Redo: tombol & keyboard shortcut ============== */
+
+document.getElementById("btnUndo").addEventListener("click", doUndo);
+document.getElementById("btnRedo").addEventListener("click", doRedo);
+
+document.addEventListener("keydown", e=>{
+  const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+  if(!isCtrlOrCmd) return;
+  if(e.key === "z" || e.key === "Z"){
+    if(e.shiftKey){
+      e.preventDefault();
+      doRedo();
+    } else {
+      e.preventDefault();
+      doUndo();
+    }
+  } else if(e.key === "y" || e.key === "Y"){
+    e.preventDefault();
+    doRedo();
+  }
+});
+
 /* ============== init ============== */
 loadAll();
 render();
+pushHistory(); // simpan state awal sebagai titik undo paling awal
 </script>
 </body>
 </html>
