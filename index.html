@@ -190,13 +190,16 @@
      Inilah kunci agar "paksa 1 halaman" benar-benar memotong di 1 halaman,
      karena transform CSS murni visual dan tidak mengubah box di document flow. */
   .fit-box{
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
+    overflow: visible;
+    display: block;
   }
   .fit-box > .sheet{
     transform-origin: top center;
-    flex-shrink: 0;
+  }
+
+  @media print{
+    .fit-box{ display:flex; justify-content:center; }
+    .fit-box > .sheet{ flex-shrink:0; }
   }
 
   @media print{
