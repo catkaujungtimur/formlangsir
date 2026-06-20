@@ -179,9 +179,16 @@
   .posawal-inline{ display:flex; align-items:center; gap:6px; font-size:11px; }
   .posawal-inline input{ width:80px; font-family:var(--mono); font-size:11.5px; padding:3px 5px; border:1px solid var(--muted); border-radius:2px; }
 
+  @page{ size: A4 portrait; margin: 10mm; }
+  @page continuous-9_5x11{ size: 9.5in 11in; margin: 8mm; }
+
+  .form-wrap{
+    transform-origin: top left;
+  }
+
   @media print{
     body{ background:#fff; padding:0; }
-    .toolbar, .shift-tab-bar, .format-bar, .form-head-bar{ display:none; }
+    .toolbar, .shift-tab-bar, .format-bar, .form-head-bar, .print-options-bar{ display:none; }
     .sheet{ border:none; padding:0; }
     .row-actions, .open-popup-row, .row-menu-wrap, .add-form-row{ display:none !important; }
     input.cell, select.cell{ border:none !important; outline:none !important; }
@@ -190,6 +197,18 @@
     .modal-overlay, .modal-box, .float-toolbar{ display:none !important; }
     .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
   }
+
+  /* ---- Print options bar (di layar, sebelum cetak) ---- */
+  .print-options-bar{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--ink); border-top:none;
+    padding:8px 12px; font-size:11px; margin-bottom:14px;
+  }
+  .print-options-bar .grp{ display:flex; align-items:center; gap:6px; }
+  .print-options-bar label{ color:var(--muted); }
+  .print-options-bar select{ font-size:11px; padding:2px 4px; border:1px solid var(--muted); border-radius:2px; }
+  .print-options-bar .radio-grp{ display:flex; gap:10px; align-items:center; }
+  .print-options-bar .radio-grp label{ display:flex; align-items:center; gap:4px; color:var(--ink); cursor:pointer; }
 
   @media (max-width:720px){
     .meta{ grid-template-columns: 90px 1fr; }
@@ -242,6 +261,20 @@
         <option value="14">14px</option>
         <option value="16">16px</option>
       </select>
+    </div>
+  </div>
+
+  <div class="print-options-bar">
+    <div class="grp">
+      <label>Ukuran kertas:</label>
+      <select id="printPaperSize">
+        <option value="continuous">Continuous Form 9.5&times;11 in</option>
+        <option value="a4">A4</option>
+      </select>
+    </div>
+    <div class="radio-grp">
+      <label><input type="radio" name="printFit" id="printFit1" value="1"> Paksa 1 halaman per form</label>
+      <label><input type="radio" name="printFit" id="printFit2" value="0" checked> Biarkan natural (boleh lebih dari 1 halaman)</label>
     </div>
   </div>
 
@@ -431,6 +464,12 @@ let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 
 let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 11.5 };
 let colWidths = { rk:13, pos:8.5, urut:27, ket:23 }; // persen
+let printOptions = { paperSize: "continuous", forceFit: false };
+
+const PAPER_SIZES = {
+  continuous: { widthMm: 241.3, heightMm: 279.4, marginMm: 8, cssPageSize: "241.3mm 279.4mm" },
+  a4: { widthMm: 210, heightMm: 297, marginMm: 10, cssPageSize: "A4" }
+};
 
 // ---- Undo/Redo ----
 let history = [];
@@ -792,6 +831,9 @@ function renderTabs(){
 function renderFormatBarValues(){
   document.getElementById("globalFontFamily").value = globalFormat.fontFamily;
   document.getElementById("globalFontSize").value = String(globalFormat.fontSize);
+  document.getElementById("printPaperSize").value = printOptions.paperSize;
+  document.getElementById("printFit1").checked = printOptions.forceFit === true;
+  document.getElementById("printFit2").checked = printOptions.forceFit === false;
 }
 
 function applyColWidths(){
@@ -807,7 +849,7 @@ function applyColWidths(){
 function saveAll(){
   try{
     allShifts[activeShift] = shiftState;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts, globalFormat, colWidths }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts, globalFormat, colWidths, printOptions }));
   }catch(e){}
 }
 function loadAll(){
@@ -819,6 +861,7 @@ function loadAll(){
       activeShift = parsed.activeShift || "malam";
       if(parsed.globalFormat) globalFormat = parsed.globalFormat;
       if(parsed.colWidths) colWidths = parsed.colWidths;
+      if(parsed.printOptions) printOptions = parsed.printOptions;
     }
   }catch(e){}
   SHIFTS.forEach(s=>{
@@ -1239,7 +1282,89 @@ document.getElementById("btnReset").addEventListener("click", ()=>{
   }
 });
 
-document.getElementById("btnPrint").addEventListener("click", ()=>{ window.print(); });
+document.getElementById("btnPrint").addEventListener("click", ()=>{
+  applyPrintSetup();
+  // beri waktu 1 frame agar style & scale sempat diterapkan sebelum dialog print muncul
+  requestAnimationFrame(()=>{
+    window.print();
+  });
+});
+
+document.getElementById("printPaperSize").addEventListener("change", e=>{
+  printOptions.paperSize = e.target.value;
+  saveAll();
+});
+document.querySelectorAll('input[name="printFit"]').forEach(radio=>{
+  radio.addEventListener("change", e=>{
+    if(e.target.checked){
+      printOptions.forceFit = (e.target.value === "1");
+      saveAll();
+    }
+  });
+});
+
+function mmToPx(mm){ return mm * (96/25.4); }
+
+function applyPrintPageStyle(){
+  const paper = PAPER_SIZES[printOptions.paperSize] || PAPER_SIZES.continuous;
+  let styleTag = document.getElementById("dynamicPageStyle");
+  if(!styleTag){
+    styleTag = document.createElement("style");
+    styleTag.id = "dynamicPageStyle";
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `@page{ size: ${paper.cssPageSize}; margin: ${paper.marginMm}mm; }`;
+}
+
+function getPageContentHeightPx(){
+  const paper = PAPER_SIZES[printOptions.paperSize] || PAPER_SIZES.continuous;
+  const heightPx = mmToPx(paper.heightMm);
+  const marginPx = mmToPx(paper.marginMm) * 2;
+  return heightPx - marginPx;
+}
+
+function applyAutoFitScale(){
+  const formWraps = document.querySelectorAll(".form-wrap");
+  const pageHeightPx = getPageContentHeightPx();
+  const MIN_SCALE = 0.55;
+
+  formWraps.forEach(wrap=>{
+    if(!printOptions.forceFit){
+      wrap.style.transform = "";
+      wrap.style.marginBottom = "";
+      return;
+    }
+    // ukur tinggi alami dulu (reset scale supaya pengukuran akurat)
+    wrap.style.transform = "scale(1)";
+    const naturalHeight = wrap.scrollHeight;
+
+    if(naturalHeight <= pageHeightPx){
+      wrap.style.transform = "";
+      wrap.style.marginBottom = "";
+      return;
+    }
+    let scale = pageHeightPx / naturalHeight;
+    scale = Math.max(MIN_SCALE, Math.min(1, scale));
+    wrap.style.transform = `scale(${scale})`;
+    // kompensasi ruang kosong yang ditinggalkan akibat scale (supaya form berikutnya tidak ada jarak besar)
+    const shrinkAmount = naturalHeight * (1 - scale);
+    wrap.style.marginBottom = `-${shrinkAmount}px`;
+  });
+}
+
+function applyPrintSetup(){
+  applyPrintPageStyle();
+  applyAutoFitScale();
+}
+
+window.addEventListener("beforeprint", applyPrintSetup);
+window.addEventListener("afterprint", ()=>{
+  // bersihkan scale setelah print supaya tampilan layar normal kembali
+  document.querySelectorAll(".form-wrap").forEach(wrap=>{
+    wrap.style.transform = "";
+    wrap.style.marginBottom = "";
+  });
+});
 
 document.getElementById("btnExportShift").addEventListener("click", ()=>{
   const blob = new Blob([JSON.stringify(shiftState, null, 2)], {type:"application/json"});
