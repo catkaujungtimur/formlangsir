@@ -182,8 +182,21 @@
   @page{ size: A4 portrait; margin: 10mm; }
   @page continuous-9_5x11{ size: 9.5in 11in; margin: 8mm; }
 
-  .form-wrap{
-    transform-origin: top left;
+  /* .fit-box membungkus .sheet. Saat force-fit aktif, JS akan men-set
+     height eksplisit pada .fit-box sebesar tinggi target (sudah dikecilkan),
+     lalu men-scale .sheet di dalamnya. Karena .fit-box punya height eksplisit
+     dan overflow:hidden, browser print-engine menghitung tinggi yang SUDAH
+     kecil itu untuk page-break -- bukan tinggi asli .sheet sebelum di-scale.
+     Inilah kunci agar "paksa 1 halaman" benar-benar memotong di 1 halaman,
+     karena transform CSS murni visual dan tidak mengubah box di document flow. */
+  .fit-box{
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+  }
+  .fit-box > .sheet{
+    transform-origin: top center;
+    flex-shrink: 0;
   }
 
   @media print{
@@ -196,6 +209,7 @@
     .footnote-edit{ border:none; }
     .modal-overlay, .modal-box, .float-toolbar{ display:none !important; }
     .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
+    .form-wrap{ page-break-inside: avoid; break-inside: avoid; }
   }
 
   /* ---- Print options bar (di layar, sebelum cetak) ---- */
@@ -660,6 +674,9 @@ function renderForm(form, fIdx){
   `;
   wrap.appendChild(headBar);
 
+  const fitBox = document.createElement("div");
+  fitBox.className = "fit-box";
+
   const sheet = document.createElement("div");
   sheet.className = "sheet";
   sheet.innerHTML = `
@@ -727,7 +744,8 @@ function renderForm(form, fIdx){
       <tr data-signrow-for="${fIdx}"></tr>
     </table>
   `;
-  wrap.appendChild(sheet);
+  fitBox.appendChild(sheet);
+  wrap.appendChild(fitBox);
 
   // render tbody isinya
   renderTbody(form, fIdx, sheet.querySelector(`[data-tbody-for="${fIdx}"]`));
@@ -1326,29 +1344,53 @@ function getPageContentHeightPx(){
 function applyAutoFitScale(){
   const formWraps = document.querySelectorAll(".form-wrap");
   const pageHeightPx = getPageContentHeightPx();
-  const MIN_SCALE = 0.55;
+  // Tidak ada batas skala minimum: tujuannya adalah SELALU pas dalam 1 halaman
+  // (mirip "fit to page" di Excel/Word), seberapa pun kecil hasilnya.
+  // Kalau dibatasi minimum, konten yang sangat panjang akan tetap terpotong
+  // ke halaman ke-2/3 -- itulah bug yang dilaporkan.
+  const MIN_SCALE = 0.001;
 
   formWraps.forEach(wrap=>{
+    const fitBox = wrap.querySelector(".fit-box");
+    const sheet = wrap.querySelector(".fit-box > .sheet");
+    if(!fitBox || !sheet) return;
+
     if(!printOptions.forceFit){
-      wrap.style.transform = "";
-      wrap.style.marginBottom = "";
+      // mode natural: bersihkan semua override, biarkan tinggi alami
+      sheet.style.transform = "";
+      sheet.style.width = "";
+      fitBox.style.height = "";
+      fitBox.style.overflow = "";
       return;
     }
-    // ukur tinggi alami dulu (reset scale supaya pengukuran akurat)
-    wrap.style.transform = "scale(1)";
-    const naturalHeight = wrap.scrollHeight;
+
+    // ukur tinggi alami dulu (reset scale & height supaya pengukuran akurat)
+    sheet.style.transform = "scale(1)";
+    fitBox.style.height = "auto";
+    fitBox.style.overflow = "visible";
+    const naturalHeight = sheet.scrollHeight;
+    const naturalWidth = sheet.scrollWidth;
 
     if(naturalHeight <= pageHeightPx){
-      wrap.style.transform = "";
-      wrap.style.marginBottom = "";
+      // sudah cukup 1 halaman tanpa perlu diperkecil
+      sheet.style.transform = "";
+      sheet.style.width = "";
+      fitBox.style.height = "";
+      fitBox.style.overflow = "";
       return;
     }
+
     let scale = pageHeightPx / naturalHeight;
     scale = Math.max(MIN_SCALE, Math.min(1, scale));
-    wrap.style.transform = `scale(${scale})`;
-    // kompensasi ruang kosong yang ditinggalkan akibat scale (supaya form berikutnya tidak ada jarak besar)
-    const shrinkAmount = naturalHeight * (1 - scale);
-    wrap.style.marginBottom = `-${shrinkAmount}px`;
+
+    // KUNCI: .fit-box diberi height EKSPLISIT sebesar hasil scale (bukan tinggi asli),
+    // dan overflow:hidden. Karena .fit-box adalah box nyata di document flow,
+    // print engine (penentu page-break) akan menghitung tinggi sekecil ini --
+    // bukan tinggi asli .sheet sebelum di-scale.
+    fitBox.style.height = (naturalHeight * scale) + "px";
+    fitBox.style.overflow = "hidden";
+    sheet.style.width = naturalWidth + "px";
+    sheet.style.transform = `scale(${scale})`;
   });
 }
 
@@ -1361,8 +1403,10 @@ window.addEventListener("beforeprint", applyPrintSetup);
 window.addEventListener("afterprint", ()=>{
   // bersihkan scale setelah print supaya tampilan layar normal kembali
   document.querySelectorAll(".form-wrap").forEach(wrap=>{
-    wrap.style.transform = "";
-    wrap.style.marginBottom = "";
+    const fitBox = wrap.querySelector(".fit-box");
+    const sheet = wrap.querySelector(".fit-box > .sheet");
+    if(fitBox){ fitBox.style.height = ""; fitBox.style.overflow = ""; }
+    if(sheet){ sheet.style.transform = ""; sheet.style.width = ""; }
   });
 });
 
