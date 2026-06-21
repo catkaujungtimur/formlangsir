@@ -18,10 +18,10 @@
     --warn-text:#8a5a00;
     --mono: "JetBrains Mono", "Courier New", monospace;
     --sans: "IBM Plex Sans", Arial, sans-serif;
-    --col-rk: 13%;
-    --col-pos: 8.5%;
-    --col-urut: 27%;
-    --col-ket: 23%;
+    --col-rk: 12%;
+    --col-pos: 7%;
+    --col-urut: 29%;
+    --col-ket: 30%;
   }
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--bg); font-family:var(--sans); color:var(--ink); padding:24px; }
@@ -158,6 +158,7 @@
 
   .sign{ width:100%; border-collapse:collapse; font-size:calc(11.5px * var(--fs)); }
   .sign td{ border:1px solid var(--ink); padding:calc(6px * var(--fs)) 8px; vertical-align:top; width:16.6%; }
+  .sign-blank-row td{ height:calc(34px * var(--fs)); border-bottom:none; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
   .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); }
   .sign select{ width:100%; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
@@ -168,14 +169,6 @@
 
 
   .add-form-row{ text-align:center; margin-top:18px; }
-
-  /* ---- Floating font toolbar ---- */
-  .float-toolbar{
-    position:fixed; display:none; z-index:200; background:#fff; border:1px solid var(--ink);
-    box-shadow:0 4px 16px rgba(0,0,0,.25); border-radius:5px; padding:6px 8px; gap:6px; align-items:center;
-  }
-  .float-toolbar.open{ display:flex; }
-  .float-toolbar select{ font-size:11px; padding:2px 4px; border:1px solid var(--muted); border-radius:2px; }
 
   /* ---- Modal draggable ---- */
   .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.15); display:none; z-index:100; }
@@ -201,14 +194,15 @@
 
   @media print{
     body{ background:#fff; padding:0; }
-    .toolbar, .shift-tab-bar, .format-bar, .form-head-bar, .print-options-bar{ display:none; }
+    .toolbar, .shift-tab-bar, .format-bar, .form-head-bar, .print-options-bar{ display:none !important; }
     .sheet{ border:none; padding:0; }
     .row-actions, .open-popup-row, .row-menu-wrap, .add-form-row{ display:none !important; }
     .col-actions{ display:none !important; }
+    .date-arrow{ display:none !important; }
     input.cell, select.cell{ border:none !important; outline:none !important; }
     .meta input{ border-bottom:none; }
     .footnote-edit{ border:none; }
-    .modal-overlay, .modal-box, .float-toolbar{ display:none !important; }
+    .modal-overlay, .modal-box{ display:none !important; }
     .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
     .form-wrap{ page-break-inside: avoid; break-inside: avoid; }
   }
@@ -277,6 +271,9 @@
         <option value="16">16px</option>
       </select>
     </div>
+    <div class="grp">
+      <button id="btnResetColWidths" class="ghost small">Reset Lebar Kolom</button>
+    </div>
   </div>
 
   <div class="print-options-bar">
@@ -299,24 +296,6 @@
     <button id="btnAddForm" class="primary">+ Tambah Form Langsir</button>
     <div class="hint">Membuat form baru (nomor surat, jam, rangkaian, tanda tangan terpisah) dalam shift yang sama. Semua form tercetak berurutan, masing-masing di halaman baru.</div>
   </div>
-</div>
-
-<!-- ===== Floating toolbar font (untuk blok teks manual) ===== -->
-<div class="float-toolbar" id="floatToolbar">
-  <select id="ftFontFamily">
-    <option value="'IBM Plex Sans',Arial,sans-serif">Sans</option>
-    <option value="'JetBrains Mono','Courier New',monospace">Monospace</option>
-    <option value="Georgia,serif">Serif</option>
-  </select>
-  <select id="ftFontSize">
-    <option value="10">10px</option>
-    <option value="11">11px</option>
-    <option value="12">12px (default)</option>
-    <option value="14">14px</option>
-    <option value="16">16px</option>
-    <option value="18">18px</option>
-    <option value="22">22px</option>
-  </select>
 </div>
 
 <!-- ===== Modal popup Edit Keterangan (draggable) ===== -->
@@ -478,7 +457,7 @@ let activeShift = "malam";
 let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 
 let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 11.5 };
-let colWidths = { rk:13, pos:8.5, urut:27, ket:23 }; // persen
+let colWidths = { rk:12, pos:7, urut:29, ket:30 }; // persen
 let printOptions = { paperSize: "continuous", forceFit: false };
 
 const PAPER_SIZES = {
@@ -739,6 +718,7 @@ function renderForm(form, fIdx){
         <td class="role">SCHOWING</td>
         <td class="role">PPKA</td>
       </tr>
+      <tr class="sign-blank-row"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr data-signrow-for="${fIdx}"></tr>
     </table>
   `;
@@ -1297,6 +1277,13 @@ document.getElementById("btnReset").addEventListener("click", ()=>{
   }
 });
 
+document.getElementById("btnResetColWidths").addEventListener("click", ()=>{
+  // Default baru: kolom Keterangan & Urutan Pergerakan Langsir dilebarkan, sesuai contoh form asli
+  colWidths = { rk:12, pos:7, urut:29, ket:30 };
+  applyColWidths();
+  saveAll();
+});
+
 document.getElementById("btnPrint").addEventListener("click", ()=>{
   applyPrintSetup();
   // Double rAF: frame pertama memastikan style baru sudah di-commit ke render tree,
@@ -1581,79 +1568,6 @@ document.getElementById("modalApply").addEventListener("click", ()=>{
     box.style.left = x + "px"; box.style.top = y + "px";
   }, {passive:true});
   document.addEventListener("touchend", ()=>{ dragging = false; });
-})();
-
-/* ============== Floating font toolbar (blok teks manual) ============== */
-
-(function setupFloatToolbar(){
-  const toolbar = document.getElementById("floatToolbar");
-  const selFamily = document.getElementById("ftFontFamily");
-  const selSize = document.getElementById("ftFontSize");
-  let savedRange = null;
-
-  function isInsideEditable(node){
-    return !!(node && node.nodeType && (node.closest ? node.closest(".editable-cell, .block-name-edit, .footnote-edit") : node.parentElement && node.parentElement.closest(".editable-cell, .block-name-edit, .footnote-edit")));
-  }
-
-  document.addEventListener("selectionchange", ()=>{
-    try{
-      const sel = window.getSelection();
-      if(!sel || sel.rangeCount === 0 || sel.isCollapsed){
-        toolbar.classList.remove("open");
-        return;
-      }
-      const range = sel.getRangeAt(0);
-      const container = range.commonAncestorContainer;
-      const editableHost = container.nodeType === 1 ? container.closest(".editable-cell, .block-name-edit, .footnote-edit") : container.parentElement && container.parentElement.closest(".editable-cell, .block-name-edit, .footnote-edit");
-      if(!editableHost){
-        toolbar.classList.remove("open");
-        return;
-      }
-      savedRange = range.cloneRange();
-      const rect = range.getBoundingClientRect ? range.getBoundingClientRect() : null;
-      if(!rect || (rect.width === 0 && rect.height === 0)){ toolbar.classList.remove("open"); return; }
-      toolbar.style.left = Math.max(4, rect.left) + "px";
-      toolbar.style.top = Math.max(4, rect.top - 42) + "px";
-      toolbar.classList.add("open");
-    }catch(err){
-      toolbar.classList.remove("open");
-    }
-  });
-
-  function applyStyleToSelection(styleProp, value){
-    if(!savedRange) return;
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedRange);
-
-    const span = document.createElement("span");
-    span.style[styleProp] = value;
-
-    // bungkus seleksi dengan span baru (pendekatan sederhana: surroundContents kalau memungkinkan)
-    try{
-      savedRange.surroundContents(span);
-    }catch(e){
-      // fallback: extract & re-insert (untuk seleksi lintas beberapa node)
-      const frag = savedRange.extractContents();
-      span.appendChild(frag);
-      savedRange.insertNode(span);
-    }
-
-    // trigger input event manual supaya state ke-update
-    const host = span.closest(".editable-cell, .block-name-edit, .footnote-edit");
-    if(host){
-      host.dispatchEvent(new Event("input", {bubbles:true}));
-    }
-    toolbar.classList.remove("open");
-  }
-
-  selFamily.addEventListener("mousedown", e=>e.preventDefault()); // jaga selection
-  selFamily.addEventListener("change", ()=>{ applyStyleToSelection("fontFamily", selFamily.value); });
-  selSize.addEventListener("mousedown", e=>e.preventDefault());
-  selSize.addEventListener("change", ()=>{ applyStyleToSelection("fontSize", selSize.value+"px"); });
-
-  // jangan tutup toolbar saat klik di dalam toolbar itu sendiri
-  toolbar.addEventListener("mousedown", e=>{ e.stopPropagation(); });
 })();
 
 /* ============== Resize kolom (drag header) ============== */
