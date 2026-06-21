@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -261,17 +262,6 @@
       </select>
     </div>
     <div class="grp">
-      <label>Ukuran:</label>
-      <select id="globalFontSize">
-        <option value="10">10px</option>
-        <option value="10.5">10.5px</option>
-        <option value="11.5">11.5px (default)</option>
-        <option value="12.5">12.5px</option>
-        <option value="14">14px</option>
-        <option value="16">16px</option>
-      </select>
-    </div>
-    <div class="grp">
       <button id="btnResetColWidths" class="ghost small">Reset Lebar Kolom</button>
     </div>
   </div>
@@ -456,7 +446,7 @@ let allShifts = {};
 let activeShift = "malam";
 let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 
-let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 11.5 };
+let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace" };
 let colWidths = { rk:12, pos:7, urut:29, ket:30 }; // persen
 let printOptions = { paperSize: "continuous", forceFit: false };
 
@@ -743,7 +733,7 @@ function renderTbody(form, fIdx, tbody){
       <td>
         <div class="block-name-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-blockname="1" data-placeholder="Nama rangkaian">${escapeHtml(block.name)}</div>
       </td>
-      <td colspan="2" class="block-title-auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
+      <td colspan="2" class="block-title-auto" style="font-family:${globalFormat.fontFamily};">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
       <td colspan="2">
         <div class="row-actions">
           <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}" class="success">Edit Keterangan</button>
@@ -766,14 +756,14 @@ function renderTbody(form, fIdx, tbody){
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><span class="auto" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${lokoLabels[rIdx]}</span></td>
+        <td><span class="auto" style="font-family:${globalFormat.fontFamily};">${lokoLabels[rIdx]}</span></td>
         <td class="col-pos">
           <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal" data-navcol="0">
         </td>
         <td class="col-pos">
           <input class="cell" style="text-align:center" value="${escapeAttr(row.posAkhir)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAkhir" data-navcol="1">
         </td>
-        <td class="auto-line" style="font-family:${globalFormat.fontFamily}; font-size:${globalFormat.fontSize}px;">${urutText}</td>
+        <td class="auto-line" style="font-family:${globalFormat.fontFamily};">${urutText}</td>
         <td>
           <div class="editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-ketcell="1" data-placeholder="contoh: C1: AMBIL 9 KRT EX 279" data-navcol="2">${escapeHtml(row.ket)}</div>
         </td>
@@ -825,7 +815,6 @@ function renderTabs(){
 
 function renderFormatBarValues(){
   document.getElementById("globalFontFamily").value = globalFormat.fontFamily;
-  document.getElementById("globalFontSize").value = String(globalFormat.fontSize);
   document.getElementById("printPaperSize").value = printOptions.paperSize;
   document.getElementById("printFit1").checked = printOptions.forceFit === true;
   document.getElementById("printFit2").checked = printOptions.forceFit === false;
@@ -881,10 +870,6 @@ document.getElementById("shiftTabs").addEventListener("click", e=>{
 
 document.getElementById("globalFontFamily").addEventListener("change", e=>{
   globalFormat.fontFamily = e.target.value;
-  render();
-});
-document.getElementById("globalFontSize").addEventListener("change", e=>{
-  globalFormat.fontSize = parseFloat(e.target.value);
   render();
 });
 
