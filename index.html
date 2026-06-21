@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -695,7 +696,7 @@ function renderForm(form, fIdx){
   sheet.className = "sheet";
   sheet.innerHTML = `
     <p class="title">FORM PERINTAH LANGSIR</p>
-    <p class="nomor">NOMOR: <input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpNomorAwal" value="${escapeAttr(form.inpNomorAwal)}" placeholder=".." size="2">/<input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpKodeKtg" value="${escapeAttr(form.inpKodeKtg)}" size="3">/<span data-nomor-romawi-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).romawi}</span>/<span data-nomor-tahun-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).tahun}</span></p>
+    <p class="nomor">NOMOR: <input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpNomorAwal" value="${escapeAttr(form.inpNomorAwal)}" size="2">/<input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpKodeKtg" value="${escapeAttr(form.inpKodeKtg || "KTG")}" size="3">/<span data-nomor-romawi-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).romawi}</span>/<span data-nomor-tahun-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).tahun}</span></p>
 
     <div class="meta">
       <label>Hari/Tanggal :</label>
@@ -780,8 +781,8 @@ function renderTbody(form, fIdx, tbody){
       <td>
         <div class="block-name-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-blockname="1" data-placeholder="Nama rangkaian">${escapeHtml(block.name)}</div>
       </td>
-      <td colspan="2" class="block-title-auto" style="font-family:${globalFormat.fontFamily};">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
-      <td colspan="2">
+      <td colspan="3" class="block-title-auto" style="font-family:${globalFormat.fontFamily};">${title || "<span class='hint'>belum ada keterangan</span>"}</td>
+      <td>
         <div class="row-actions">
           <button data-action="editket" data-form="${fIdx}" data-block="${bIdx}" class="success">Edit Keterangan</button>
           <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}" class="success">+ Baris</button>
@@ -907,7 +908,11 @@ function loadAll(){
   }catch(e){}
   SHIFTS.forEach(s=>{
     if(!allShifts[s.id] || !allShifts[s.id].forms){ allShifts[s.id] = emptyShiftState(); }
-    allShifts[s.id].forms.forEach(f=>{ if(!f.footnote) f.footnote = DEFAULT_FOOTNOTE; });
+    allShifts[s.id].forms.forEach(f=>{
+      if(!f.footnote) f.footnote = DEFAULT_FOOTNOTE;
+      if(!f.inpKodeKtg) f.inpKodeKtg = "KTG"; // migrasi data lama (field belum ada / kosong)
+      if(f.inpNomorAwal === undefined) f.inpNomorAwal = "";
+    });
   });
   shiftState = allShifts[activeShift];
 }
