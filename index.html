@@ -101,8 +101,8 @@
   .date-display{ font-family:var(--mono); }
 
   table.main{ width:100%; border-collapse:collapse; font-size:calc(12px * var(--fs)); table-layout:fixed; }
-  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(4px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; }
-  table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; }
+  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(4px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; font-size:calc(12px * var(--fs)); }
+  table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; line-height:1.25; }
   .col-rk{ width:var(--col-rk); }
   .col-pos{ width:var(--col-pos); text-align:center; }
   .col-urut{ width:var(--col-urut); }
@@ -220,6 +220,16 @@
   .print-options-bar .radio-grp{ display:flex; gap:10px; align-items:center; }
   .print-options-bar .radio-grp label{ display:flex; align-items:center; gap:4px; color:var(--ink); cursor:pointer; }
 
+  .font-volume-grp{ display:none; } /* default tersembunyi, JS akan menampilkan kalau forceFit aktif */
+  .font-volume-grp.active{ display:flex; }
+  .font-volume-grp button{ width:26px; height:24px; padding:0; font-size:14px; line-height:1; font-weight:700; }
+  .font-volume-grp #fsVolReset{ width:auto; padding:3px 8px; font-size:10.5px; font-weight:400; }
+  .fs-vol-indicator{
+    display:inline-block; min-width:34px; text-align:center; font-family:var(--mono);
+    font-weight:700; color:var(--accent); background:#fff; border:1px solid var(--muted);
+    border-radius:3px; padding:2px 4px;
+  }
+
   @media (max-width:720px){
     .meta{ grid-template-columns: 90px 1fr; }
     table.main{ font-size:10.5px; }
@@ -277,6 +287,14 @@
     <div class="radio-grp">
       <label><input type="radio" name="printFit" id="printFit1" value="1"> Paksa 1 halaman per form</label>
       <label><input type="radio" name="printFit" id="printFit2" value="0" checked> Biarkan natural (boleh lebih dari 1 halaman)</label>
+    </div>
+    <div class="grp font-volume-grp" id="fontVolumeGrp">
+      <label>Ukuran tulisan hasil cetak:</label>
+      <button type="button" id="fsVolDown" class="small ghost" title="Perkecil tulisan">&minus;</button>
+      <span id="fsVolIndicator" class="fs-vol-indicator">0</span>
+      <button type="button" id="fsVolUp" class="small ghost" title="Perbesar tulisan">+</button>
+      <button type="button" id="fsVolReset" class="small ghost" title="Kembali ke otomatis">Reset</button>
+      <button type="button" id="fsPreviewClose" class="small ghost" title="Keluar dari mode preview, kembali ke tampilan layar normal">Tutup Preview</button>
     </div>
   </div>
 
@@ -448,7 +466,10 @@ let shiftState = null; // alias allShifts[activeShift] => { forms: [...] }
 
 let globalFormat = { fontFamily: "'JetBrains Mono','Courier New',monospace" };
 let colWidths = { rk:12, pos:7, urut:29, ket:30 }; // persen
-let printOptions = { paperSize: "continuous", forceFit: false };
+let printOptions = { paperSize: "continuous", forceFit: false, manualFsAdjust: 0 };
+// manualFsAdjust: penyesuaian manual dari tombol "volume" font (+/-), dalam langkah 0.05.
+// 0 = pakai hasil otomatis dari binary search (default). Tiap +1 step menambah --fs
+// hasil otomatis sebesar 5% (dikali, bukan ditambah, supaya proporsional di skala manapun).
 
 const PAPER_SIZES = {
   continuous: { widthMm: 241.3, heightMm: 279.4, marginMm: 8, cssPageSize: "241.3mm 279.4mm" },
@@ -818,6 +839,8 @@ function renderFormatBarValues(){
   document.getElementById("printPaperSize").value = printOptions.paperSize;
   document.getElementById("printFit1").checked = printOptions.forceFit === true;
   document.getElementById("printFit2").checked = printOptions.forceFit === false;
+  updateFontVolumeVisibility();
+  updateFsVolIndicator();
 }
 
 function applyColWidths(){
@@ -1291,8 +1314,48 @@ document.querySelectorAll('input[name="printFit"]').forEach(radio=>{
   radio.addEventListener("change", e=>{
     if(e.target.checked){
       printOptions.forceFit = (e.target.value === "1");
+      updateFontVolumeVisibility();
       saveAll();
     }
+  });
+});
+
+function updateFontVolumeVisibility(){
+  document.getElementById("fontVolumeGrp").classList.toggle("active", printOptions.forceFit);
+}
+
+function updateFsVolIndicator(){
+  const v = printOptions.manualFsAdjust || 0;
+  document.getElementById("fsVolIndicator").textContent = (v > 0 ? "+" : "") + v;
+}
+
+document.getElementById("fsVolUp").addEventListener("click", ()=>{
+  printOptions.manualFsAdjust = (printOptions.manualFsAdjust || 0) + 1;
+  updateFsVolIndicator();
+  applyAutoFitScale(); // langsung terapkan ke layar supaya user bisa lihat hasilnya tanpa harus print dulu
+  saveAll();
+});
+document.getElementById("fsVolDown").addEventListener("click", ()=>{
+  printOptions.manualFsAdjust = (printOptions.manualFsAdjust || 0) - 1;
+  updateFsVolIndicator();
+  applyAutoFitScale();
+  saveAll();
+});
+document.getElementById("fsVolReset").addEventListener("click", ()=>{
+  printOptions.manualFsAdjust = 0;
+  updateFsVolIndicator();
+  applyAutoFitScale();
+  saveAll();
+});
+document.getElementById("fsPreviewClose").addEventListener("click", ()=>{
+  // Keluar dari mode preview (kembalikan tampilan layar ke ukuran/lebar normal),
+  // TANPA mengubah printOptions.forceFit atau manualFsAdjust -- supaya kalau nanti
+  // klik tombol "Cetak / Simpan PDF", hasil cetak tetap mengikuti setting terakhir
+  // (applyPrintSetup akan memanggil applyAutoFitScale lagi sesaat sebelum print).
+  document.querySelectorAll(".form-wrap").forEach(wrap=>{
+    const sheet = wrap.querySelector(".sheet");
+    if(sheet){ sheet.style.setProperty("--fs","1"); sheet.style.width=""; }
+    wrap.style.pageBreakBefore = "";
   });
 });
 
@@ -1409,7 +1472,13 @@ function applyAutoFitScale(){
 
   function finalizeGroup(group){
     if(!group || group.length===0) return;
-    const fs = group._fs ?? findFsForGroup(group);
+    const fsAuto = group._fs ?? findFsForGroup(group);
+    // manualFsAdjust: tombol volume +/- milik pengguna, dalam langkah 0.05 (5%).
+    // Diterapkan sebagai PENGALI di atas hasil otomatis (bukan pengganti), supaya
+    // proporsinya konsisten di skala manapun. Contoh: manualFsAdjust=2 -> fsAuto*1.10,
+    // manualFsAdjust=-3 -> fsAuto*0.85. Tidak ada pembatasan minimum/maksimum di sini
+    // (sesuai keputusan: biarkan pengguna bereksperimen sendiri lewat tombol volume).
+    const fs = fsAuto * (1 + (printOptions.manualFsAdjust || 0) * 0.05);
     group.forEach((it, i)=>{
       it.sheet.style.setProperty("--fs", String(fs));
       // Form pertama dalam grup: TETAP mulai halaman baru (kecuali dia form paling pertama
@@ -1422,7 +1491,7 @@ function applyAutoFitScale(){
       }
     });
     const totalH = group.reduce((s,it)=>s+it.sheet.scrollHeight, 0);
-    console.log(`[Fit Halaman] grup ${group.length} form digabung, --fs: ${fs.toFixed(4)}, total tinggi: ${totalH.toFixed(0)}px / target ${pageHeightPx.toFixed(0)}px`);
+    console.log(`[Fit Halaman] grup ${group.length} form digabung, --fs otomatis: ${fsAuto.toFixed(4)}, manual adjust: ${printOptions.manualFsAdjust||0}, --fs final: ${fs.toFixed(4)}, total tinggi: ${totalH.toFixed(0)}px / target ${pageHeightPx.toFixed(0)}px`);
   }
 }
 
