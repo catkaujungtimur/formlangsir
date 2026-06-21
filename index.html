@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -65,15 +66,25 @@
   .form-head-bar .form-label{ font-size:11.5px; font-weight:700; color:var(--accent); }
   .form-head-bar .form-del{ font-size:10.5px; padding:3px 8px; }
 
-  .sheet{ background:var(--paper); border:1px solid var(--ink); padding:20px 26px; }
+  .sheet{
+    background:var(--paper); border:1px solid var(--ink); padding:calc(20px * var(--fs)) calc(26px * var(--fs));
+    /* --fs = "font scale": faktor pengecil ukuran asli (bukan transform/zoom visual).
+       Default 1 = ukuran normal. JS (applyAutoFitScale) akan mengubah nilai ini
+       langsung lewat style.setProperty saat "Paksa 1 halaman" aktif, supaya
+       font-size, line-height, dan padding benar-benar mengecil di document flow --
+       sehingga page-break dan border tabel terhitung & tergambar dengan benar
+       di semua browser (Chrome maupun Firefox), tanpa efek samping transform:scale()
+       yang bisa menghilangkan border tipis tabel akibat sub-pixel rendering. */
+    --fs: 1;
+  }
 
-  .title{ text-align:center; font-weight:700; font-size:17px; letter-spacing:.02em; margin:0 0 2px; }
-  .nomor{ text-align:center; font-size:13px; margin:0 0 14px; font-family:var(--mono); color:var(--accent); font-weight:600; }
+  .title{ text-align:center; font-weight:700; font-size:calc(17px * var(--fs)); letter-spacing:.02em; margin:0 0 2px; }
+  .nomor{ text-align:center; font-size:calc(13px * var(--fs)); margin:0 0 calc(14px * var(--fs)); font-family:var(--mono); color:var(--accent); font-weight:600; }
 
-  .meta{ display:grid; grid-template-columns: 110px 1fr 90px 1fr; gap:4px 8px; font-size:12.5px; margin-bottom:10px; }
+  .meta{ display:grid; grid-template-columns: 110px 1fr 90px 1fr; gap:calc(4px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(10px * var(--fs)); }
   .meta label{ font-weight:700; }
   .meta .val{ font-family:var(--mono); }
-  .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:12.5px; padding:2px 2px; background:transparent; }
+  .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:calc(12.5px * var(--fs)); padding:calc(2px * var(--fs)) 2px; background:transparent; }
   .meta input:focus{ outline:none; border-bottom:1px solid var(--accent); }
   .date-nav{ display:flex; align-items:center; gap:6px; }
   .date-arrow{
@@ -83,8 +94,8 @@
   .date-arrow:hover{ background:var(--accent-soft); border-color:var(--accent); }
   .date-display{ font-family:var(--mono); }
 
-  table.main{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
-  table.main td, table.main th{ border:1px solid var(--ink); padding:4px 6px; vertical-align:middle; overflow:hidden; }
+  table.main{ width:100%; border-collapse:collapse; font-size:calc(12px * var(--fs)); table-layout:fixed; }
+  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(4px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; }
   table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; }
   .col-rk{ width:var(--col-rk); }
   .col-pos{ width:var(--col-pos); text-align:center; }
@@ -97,14 +108,14 @@
   }
   .col-resizer:hover{ background:rgba(138,31,31,.3); }
 
-  tr.block-header td{ background:var(--accent-soft); font-weight:700; font-size:12.5px; }
+  tr.block-header td{ background:var(--accent-soft); font-weight:700; font-size:calc(12.5px * var(--fs)); }
   .block-name-edit{
-    width:100%; min-height:18px; font-weight:700; font-size:12.5px; font-family:var(--sans);
+    width:100%; min-height:calc(18px * var(--fs)); font-weight:700; font-size:calc(12.5px * var(--fs)); font-family:var(--sans);
     padding:1px 2px; cursor:text;
   }
   .block-name-edit:focus{ outline:1px solid var(--accent); background:#fff; }
   .block-name-edit:empty:before{ content: attr(data-placeholder); color:var(--muted); font-weight:400; }
-  .block-title-auto{ text-align:center; font-family:var(--mono); font-size:12px; }
+  .block-title-auto{ text-align:center; font-family:var(--mono); font-size:calc(12px * var(--fs)); }
 
   .row-actions{ display:flex; gap:4px; justify-content:flex-end; flex-wrap:wrap; }
   .row-actions button{ padding:2px 7px; font-size:10.5px; }
@@ -116,39 +127,40 @@
   .row-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:7px 10px; font-size:11.5px; border-radius:0; }
   .row-menu button:hover{ background:var(--accent-soft); }
 
-  input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:12px; font-family:var(--sans); padding:1px 2px; }
+  input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; }
   input.cell:focus, select.cell:focus{ outline:1px solid var(--accent); background:#fff; }
-  .editable-cell{ width:100%; min-height:16px; font-size:12px; font-family:var(--sans); padding:1px 2px; cursor:text; white-space:pre-wrap; word-break:break-word; }
+  .editable-cell{ width:100%; min-height:calc(16px * var(--fs)); font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; cursor:text; white-space:pre-wrap; word-break:break-word; }
   .editable-cell:focus{ outline:1px solid var(--accent); background:#fff; }
   .editable-cell:empty:before{ content: attr(data-placeholder); color:var(--muted); }
 
-  .auto{ color:var(--accent); font-weight:600; font-family:var(--mono); font-size:11.5px; }
-  .auto-line{ font-size:11.5px; line-height:1.4; }
+  .auto{ color:var(--accent); font-weight:600; font-family:var(--mono); font-size:calc(11.5px * var(--fs)); }
+  .auto-line{ font-size:calc(11.5px * var(--fs)); line-height:1.4; }
   .warn-text{ color:var(--warn-text); font-size:10.5px; }
 
   .open-popup-row{ text-align:center; padding:10px 0; }
   .open-popup-row .hint{ display:block; margin-top:4px; }
 
-  .footnote{ font-size:11px; margin-top:10px; line-height:1.5; }
+  .footnote{ font-size:calc(11px * var(--fs)); margin-top:10px; line-height:1.5; }
   .footnote-edit{
     width:100%; min-height:50px; border:1px dashed var(--muted); font-family:var(--sans);
-    font-size:11px; padding:6px; margin-top:8px; background:transparent; cursor:text; white-space:pre-wrap;
+    font-size:calc(11px * var(--fs)); padding:calc(6px * var(--fs)) 6px; margin-top:calc(8px * var(--fs)); background:transparent; cursor:text; white-space:pre-wrap;
   }
   .footnote-edit:focus{ outline:1px solid var(--accent); background:#fff; }
 
-  .sign-caption{ display:flex; width:100%; font-size:11px; font-weight:700; margin-top:14px; }
-  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:4px; background:var(--panel); text-align:center; }
-  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:4px; background:var(--panel); text-align:center; }
+  .sign-caption{ display:flex; width:100%; font-size:calc(11px * var(--fs)); font-weight:700; margin-top:calc(14px * var(--fs)); }
+  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
+  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
 
-  .sign{ width:100%; border-collapse:collapse; font-size:11.5px; }
-  .sign td{ border:1px solid var(--ink); padding:6px 8px; vertical-align:top; width:16.6%; }
+  .sign{ width:100%; border-collapse:collapse; font-size:calc(11.5px * var(--fs)); }
+  .sign td{ border:1px solid var(--ink); padding:calc(6px * var(--fs)) 8px; vertical-align:top; width:16.6%; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
-  .sign .field-label{ color:var(--muted); font-size:10.5px; }
-  .sign select{ width:100%; font-family:var(--sans); font-size:11.5px; border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
+  .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); }
+  .sign select{ width:100%; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
   .sign select:focus{ outline:none; border-bottom:1px solid var(--accent); }
-  .sign .nipp-display{ font-size:11.5px; padding:2px 0; }
+  .sign .nipp-display{ font-size:calc(11.5px * var(--fs)); padding:2px 0; }
 
   .hint{ font-size:10.5px; color:var(--muted); }
+
 
   .add-form-row{ text-align:center; margin-top:18px; }
 
@@ -181,26 +193,6 @@
 
   @page{ size: A4 portrait; margin: 10mm; }
   @page continuous-9_5x11{ size: 9.5in 11in; margin: 8mm; }
-
-  /* .fit-box membungkus .sheet. Saat force-fit aktif, JS akan men-set
-     height eksplisit pada .fit-box sebesar tinggi target (sudah dikecilkan),
-     lalu men-scale .sheet di dalamnya. Karena .fit-box punya height eksplisit
-     dan overflow:hidden, browser print-engine menghitung tinggi yang SUDAH
-     kecil itu untuk page-break -- bukan tinggi asli .sheet sebelum di-scale.
-     Inilah kunci agar "paksa 1 halaman" benar-benar memotong di 1 halaman,
-     karena transform CSS murni visual dan tidak mengubah box di document flow. */
-  .fit-box{
-    overflow: visible;
-    display: block;
-  }
-  .fit-box > .sheet{
-    transform-origin: top center;
-  }
-
-  @media print{
-    .fit-box{ display:flex; justify-content:center; }
-    .fit-box > .sheet{ flex-shrink:0; }
-  }
 
   @media print{
     body{ background:#fff; padding:0; }
@@ -678,9 +670,6 @@ function renderForm(form, fIdx){
   `;
   wrap.appendChild(headBar);
 
-  const fitBox = document.createElement("div");
-  fitBox.className = "fit-box";
-
   const sheet = document.createElement("div");
   sheet.className = "sheet";
   sheet.innerHTML = `
@@ -748,8 +737,7 @@ function renderForm(form, fIdx){
       <tr data-signrow-for="${fIdx}"></tr>
     </table>
   `;
-  fitBox.appendChild(sheet);
-  wrap.appendChild(fitBox);
+  wrap.appendChild(sheet);
 
   // render tbody isinya
   renderTbody(form, fIdx, sheet.querySelector(`[data-tbody-for="${fIdx}"]`));
@@ -1352,55 +1340,52 @@ function getPageContentHeightPx(){
 }
 
 function applyAutoFitScale(){
-  const formWraps = document.querySelectorAll(".form-wrap");
+  const sheets = document.querySelectorAll(".form-wrap > .sheet");
   const pageHeightPx = getPageContentHeightPx();
-  // Tidak ada batas skala minimum: tujuannya adalah SELALU pas dalam 1 halaman
-  // (mirip "fit to page" di Excel/Word), seberapa pun kecil hasilnya.
-  // Kalau dibatasi minimum, konten yang sangat panjang akan tetap terpotong
-  // ke halaman ke-2/3 -- itulah bug yang dilaporkan.
-  const MIN_SCALE = 0.001;
 
-  formWraps.forEach(wrap=>{
-    const fitBox = wrap.querySelector(".fit-box");
-    const sheet = wrap.querySelector(".fit-box > .sheet");
-    if(!fitBox || !sheet) return;
-
+  sheets.forEach(sheet=>{
     if(!printOptions.forceFit){
-      // mode natural: bersihkan semua override, biarkan tinggi alami
-      sheet.style.transform = "";
-      sheet.style.width = "";
-      fitBox.style.height = "";
-      fitBox.style.overflow = "";
+      // mode natural: kembalikan ke ukuran normal
+      sheet.style.setProperty("--fs", "1");
       return;
     }
 
-    // ukur tinggi alami dulu (reset scale & height supaya pengukuran akurat)
-    sheet.style.transform = "scale(1)";
-    fitBox.style.height = "auto";
-    fitBox.style.overflow = "visible";
+    // Reset ke ukuran normal dulu supaya pengukuran tinggi alami akurat
+    sheet.style.setProperty("--fs", "1");
     const naturalHeight = sheet.scrollHeight;
-    const naturalWidth = sheet.scrollWidth;
 
     if(naturalHeight <= pageHeightPx){
-      // sudah cukup 1 halaman tanpa perlu diperkecil
-      sheet.style.transform = "";
-      sheet.style.width = "";
-      fitBox.style.height = "";
-      fitBox.style.overflow = "";
+      // sudah cukup 1 halaman, tidak perlu diperkecil
       return;
     }
 
-    let scale = pageHeightPx / naturalHeight;
-    scale = Math.max(MIN_SCALE, Math.min(1, scale));
+    // BINARY SEARCH faktor --fs (font-scale) yang tepat agar tinggi <= pageHeightPx.
+    // Tidak dipakai rumus linear (pageHeightPx / naturalHeight) karena mengecilkan
+    // font-size TIDAK mengecilkan tinggi secara linear -- ada border, padding tetap,
+    // line-height minimum, dan word-wrap teks yang berubah non-linear saat font
+    // mengecil (baris bisa "menyatu" jadi lebih sedikit baris). Binary search lebih
+    // akurat untuk kasus ini dan tetap cepat (cuma ~16 iterasi, masing-masing 1 reflow).
+    // Batas bawah dibuat SANGAT kecil (0.01) sesuai keputusan: selalu paksa 1 halaman
+    // apapun yang terjadi, walau font jadi sangat kecil, daripada terpotong ke halaman 2.
+    let lo = 0.01;
+    let hi = 1;
+    let best = lo;
 
-    // KUNCI: .fit-box diberi height EKSPLISIT sebesar hasil scale (bukan tinggi asli),
-    // dan overflow:hidden. Karena .fit-box adalah box nyata di document flow,
-    // print engine (penentu page-break) akan menghitung tinggi sekecil ini --
-    // bukan tinggi asli .sheet sebelum di-scale.
-    fitBox.style.height = (naturalHeight * scale) + "px";
-    fitBox.style.overflow = "hidden";
-    sheet.style.width = naturalWidth + "px";
-    sheet.style.transform = `scale(${scale})`;
+    for(let i=0; i<16; i++){
+      const mid = (lo + hi) / 2;
+      sheet.style.setProperty("--fs", String(mid));
+      const h = sheet.scrollHeight; // memaksa reflow synchronous, lalu baca hasilnya
+      if(h <= pageHeightPx){
+        best = mid;   // mid ini sudah cukup kecil (pas), coba yang lebih besar lagi (mendekati 1) untuk hasil paling optimal
+        lo = mid;
+      } else {
+        hi = mid;     // masih kepanjangan, perlu lebih kecil lagi
+      }
+    }
+
+    sheet.style.setProperty("--fs", String(best));
+    // Log untuk debugging: buka DevTools Console (F12) sebelum klik "Cetak" untuk lihat ini.
+    console.log(`[Fit 1 Halaman] tinggi asli: ${naturalHeight}px, target maks: ${pageHeightPx}px, --fs terpilih: ${best.toFixed(4)}, tinggi akhir: ${sheet.scrollHeight}px`);
   });
 }
 
@@ -1410,19 +1395,15 @@ function applyPrintSetup(){
 }
 
 // CATATAN PENTING: applyPrintSetup() SENGAJA hanya dipanggil dari klik tombol
-// "Cetak / Simpan PDF" di atas (dengan requestAnimationFrame sebelum window.print()).
-// Sebelumnya ada juga listener "beforeprint" yang memanggil applyPrintSetup() lagi --
-// ini menyebabkan BUG: applyAutoFitScale() mereset dulu ke ukuran asli (besar) untuk
-// mengukur ulang, dan reset sesaat inilah yang sempat dibaca oleh print engine sebagai
-// layout final, sehingga hasil cetak jadi acak/pecah jadi beberapa halaman
-// (gejala: halaman kosong, halaman cuma judul, dst). Listener itu dihapus.
+// "Cetak / Simpan PDF" di atas (dengan requestAnimationFrame sebelum window.print()),
+// BUKAN dari event "beforeprint". Memanggil dari beforeprint menyebabkan
+// applyAutoFitScale() mereset dulu ke ukuran asli (besar) untuk mengukur ulang,
+// dan reset sesaat itu sempat dibaca print engine sebagai layout final --
+// hasilnya halaman acak/tidak sesuai. Jangan tambahkan listener beforeprint lagi.
 window.addEventListener("afterprint", ()=>{
-  // bersihkan scale setelah print supaya tampilan layar normal kembali
-  document.querySelectorAll(".form-wrap").forEach(wrap=>{
-    const fitBox = wrap.querySelector(".fit-box");
-    const sheet = wrap.querySelector(".fit-box > .sheet");
-    if(fitBox){ fitBox.style.height = ""; fitBox.style.overflow = ""; }
-    if(sheet){ sheet.style.transform = ""; sheet.style.width = ""; }
+  // bersihkan --fs setelah print supaya tampilan layar normal kembali ke ukuran asli
+  document.querySelectorAll(".form-wrap > .sheet").forEach(sheet=>{
+    sheet.style.setProperty("--fs", "1");
   });
 });
 
