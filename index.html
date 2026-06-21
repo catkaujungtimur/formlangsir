@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1338,16 +1339,35 @@ function getPageContentHeightPx(){
   return heightPx - marginPx;
 }
 
+function getPageContentWidthPx(){
+  const paper = PAPER_SIZES[printOptions.paperSize] || PAPER_SIZES.continuous;
+  const widthPx = mmToPx(paper.widthMm);
+  const marginPx = mmToPx(paper.marginMm) * 2;
+  return widthPx - marginPx;
+}
+
 function applyAutoFitScale(){
   const sheets = document.querySelectorAll(".form-wrap > .sheet");
   const pageHeightPx = getPageContentHeightPx();
+  const pageWidthPx = getPageContentWidthPx();
 
   sheets.forEach(sheet=>{
     if(!printOptions.forceFit){
       // mode natural: kembalikan ke ukuran normal
       sheet.style.setProperty("--fs", "1");
+      sheet.style.width = "";
       return;
     }
+
+    // KUNCI PENTING: paksa lebar .sheet sesuai lebar halaman cetak SESUNGGUHNYA
+    // (bukan lebar layar/viewport saat ini, yang biasanya jauh lebih lebar).
+    // Tanpa ini, scrollHeight diukur dengan word-wrap teks kolom "Urutan Pergerakan
+    // Langsir"/"Keterangan" berdasarkan lebar layar penuh -- sehingga tinggi yang
+    // dihitung JS lebih KECIL dari tinggi sesungguhnya saat dicetak (di mana lebar
+    // kertas jauh lebih sempit, sehingga teks wrap jadi lebih banyak baris).
+    // Inilah sebab kontradiksi: log bilang "sudah pas 1047px" tapi tetap kepotong
+    // jadi 2 halaman saat benar-benar dicetak.
+    sheet.style.width = pageWidthPx + "px";
 
     // Reset ke ukuran normal dulu supaya pengukuran tinggi alami akurat
     sheet.style.setProperty("--fs", "1");
@@ -1384,7 +1404,7 @@ function applyAutoFitScale(){
 
     sheet.style.setProperty("--fs", String(best));
     // Log untuk debugging: buka DevTools Console (F12) sebelum klik "Cetak" untuk lihat ini.
-    console.log(`[Fit 1 Halaman] tinggi asli: ${naturalHeight}px, target maks: ${pageHeightPx}px, --fs terpilih: ${best.toFixed(4)}, tinggi akhir: ${sheet.scrollHeight}px`);
+    console.log(`[Fit 1 Halaman] lebar dipaksa: ${pageWidthPx.toFixed(0)}px, tinggi asli: ${naturalHeight}px, target maks: ${pageHeightPx.toFixed(0)}px, --fs terpilih: ${best.toFixed(4)}, tinggi akhir: ${sheet.scrollHeight}px`);
   });
 }
 
@@ -1400,9 +1420,10 @@ function applyPrintSetup(){
 // dan reset sesaat itu sempat dibaca print engine sebagai layout final --
 // hasilnya halaman acak/tidak sesuai. Jangan tambahkan listener beforeprint lagi.
 window.addEventListener("afterprint", ()=>{
-  // bersihkan --fs setelah print supaya tampilan layar normal kembali ke ukuran asli
+  // bersihkan --fs dan width setelah print supaya tampilan layar normal kembali ke ukuran asli
   document.querySelectorAll(".form-wrap > .sheet").forEach(sheet=>{
     sheet.style.setProperty("--fs", "1");
+    sheet.style.width = "";
   });
 });
 
