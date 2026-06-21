@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -86,8 +85,13 @@
 
   .title{ text-align:center; font-weight:700; font-size:calc(17px * var(--fs)); letter-spacing:.02em; margin:0 0 2px; }
   .nomor{ text-align:center; font-size:calc(13px * var(--fs)); margin:0 0 calc(14px * var(--fs)); font-family:var(--mono); color:var(--accent); font-weight:600; }
-  .nomor.editable-cell{ width:auto; min-height:calc(18px * var(--fs)); padding:1px 4px; font-size:calc(13px * var(--fs)); font-family:var(--mono); }
-  .nomor.editable-cell:empty:before{ font-family:var(--mono); font-weight:600; }
+  .nomor-inline-input{
+    border:none; background:transparent; outline:none; text-align:center;
+    font-family:var(--mono); font-weight:600; color:var(--accent);
+    font-size:calc(13px * var(--fs)); padding:0; width:auto;
+    border-bottom:1px dotted var(--accent);
+  }
+  .nomor-inline-input:focus{ border-bottom:1px solid var(--accent); }
 
   .meta{ display:grid; grid-template-columns: 110px auto 90px 1fr; gap:calc(4px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(10px * var(--fs)); align-items:center; }
   .meta label{ font-weight:700; }
@@ -174,8 +178,11 @@
   .sign td:last-child{ border-right:none; }
   .sign-blank-row td{ height:calc(34px * var(--fs)); border-bottom:none; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
-  .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); }
-  .sign select{ width:100%; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
+  .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); white-space:nowrap; }
+  .sign select{ flex:1; min-width:0; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
+  .name-row{ display:flex; align-items:baseline; gap:4px; text-align:left; }
+  .name-row + .name-row{ margin-top:calc(4px * var(--fs)); }
+  .name-print-only{ display:none; flex:1; text-align:left; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); }
   .sign select:focus{ outline:none; border-bottom:1px solid var(--accent); }
   .sign .nipp-display{ font-size:calc(11.5px * var(--fs)); padding:2px 0; }
 
@@ -215,10 +222,13 @@
     .date-arrow{ display:none !important; }
     input.cell, select.cell{ border:none !important; outline:none !important; }
     .meta input{ border-bottom:none; }
+    .nomor-inline-input{ border-bottom:none; }
     .footnote-edit{ border:none; }
     .modal-overlay, .modal-box{ display:none !important; }
     .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
     .form-wrap{ page-break-inside: avoid; break-inside: avoid; }
+    .sign select{ display:none !important; }
+    .name-print-only{ display:inline !important; }
   }
 
   /* ---- Print options bar (di layar, sebelum cetak) ---- */
@@ -461,7 +471,8 @@ function emptyFormState(){
     inpEmplasemen: "KETAPANG",
     inpJamMulai: "",
     inpJamSelesai: "",
-    inpNomorSurat: "",
+    inpNomorAwal: "",
+    inpKodeKtg: "KTG",
     dateOffsetDays: 0,
     blocks: [ { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] } ],
     signatures: {},
@@ -573,6 +584,18 @@ function formatHariTanggal(offsetDays){
   return `${hariNames[d.getDay()]}/${dd}-${mm}-${d.getFullYear()}`;
 }
 
+function romawiBulan(m){
+  return ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][m];
+}
+
+// Mengikuti tanggal yang dipilih di form (dateOffsetDays), BUKAN tanggal hari ini saat
+// dibuka -- supaya bulan/tahun di nomor surat selalu sinkron dengan field Hari/Tanggal.
+function romawiBulanTahunForOffset(offsetDays){
+  const d = new Date();
+  d.setDate(d.getDate() + (offsetDays || 0));
+  return { romawi: romawiBulan(d.getMonth()), tahun: d.getFullYear() };
+}
+
 // ---- rows <-> text ----
 // CATATAN STRUKTUR (revisi): row.ket sekarang menyimpan TEKS LENGKAP "LABEL: teks" (apa adanya, termasuk label & titik dua).
 // Posisi Akhir (row.posAkhir) DITURUNKAN dari row.ket lewat extractLabelFromKet().
@@ -672,7 +695,7 @@ function renderForm(form, fIdx){
   sheet.className = "sheet";
   sheet.innerHTML = `
     <p class="title">FORM PERINTAH LANGSIR</p>
-    <p class="nomor editable-cell" contenteditable="true" data-form="${fIdx}" data-nomorsurat="1" data-placeholder="NOMOR: ..">${escapeHtml(form.inpNomorSurat || "")}</p>
+    <p class="nomor">NOMOR: <input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpNomorAwal" value="${escapeAttr(form.inpNomorAwal)}" placeholder=".." size="2">/<input class="nomor-inline-input" data-form="${fIdx}" data-metafield="inpKodeKtg" value="${escapeAttr(form.inpKodeKtg)}" size="3">/<span data-nomor-romawi-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).romawi}</span>/<span data-nomor-tahun-for="${fIdx}">${romawiBulanTahunForOffset(form.dateOffsetDays).tahun}</span></p>
 
     <div class="meta">
       <label>Hari/Tanggal :</label>
@@ -815,11 +838,19 @@ function renderSignRow(form, fIdx, tr){
       .concat(names.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
       .join("");
     const td = document.createElement("td");
+    td.className = "sign-namecell";
     td.innerHTML = `
-      <div class="field-label">Nama:</div>
-      <select data-form="${fIdx}" data-role="${escapeAttr(role)}">${options}</select>
-      <div class="field-label" style="margin-top:4px;">Nipp:</div>
-      <div class="nipp-display">${escapeHtml(nipp)}</div>
+      <div class="sign-namecell-inner">
+        <div class="name-row">
+          <span class="field-label">Nama:</span>
+          <select data-form="${fIdx}" data-role="${escapeAttr(role)}">${options}</select>
+          <span class="name-print-only">${escapeHtml(current)}</span>
+        </div>
+        <div class="name-row">
+          <span class="field-label">Nipp:</span>
+          <span class="nipp-display">${escapeHtml(nipp)}</span>
+        </div>
+      </div>
     `;
     tr.appendChild(td);
   });
@@ -973,13 +1004,6 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
   if(t.dataset.foot !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
     shiftState.forms[fIdx].footnote = t.textContent;
-    saveAll();
-    pushHistoryDebounced();
-    return;
-  }
-  if(t.dataset.nomorsurat !== undefined){
-    const fIdx = parseInt(t.dataset.form,10);
-    shiftState.forms[fIdx].inpNomorSurat = t.textContent;
     saveAll();
     pushHistoryDebounced();
     return;
@@ -1199,6 +1223,15 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
     form.dateOffsetDays = (form.dateOffsetDays || 0) + (action === "date-next" ? 1 : -1);
     const dateSpan = t.parentElement.querySelector(".date-display");
     if(dateSpan) dateSpan.textContent = formatHariTanggal(form.dateOffsetDays);
+    // sinkronkan romawi bulan & tahun di nomor surat dengan tanggal yang baru dipilih
+    const sheetEl = t.closest(".sheet");
+    if(sheetEl){
+      const { romawi, tahun } = romawiBulanTahunForOffset(form.dateOffsetDays);
+      const romawiEl = sheetEl.querySelector(`[data-nomor-romawi-for="${fIdx}"]`);
+      const tahunEl = sheetEl.querySelector(`[data-nomor-tahun-for="${fIdx}"]`);
+      if(romawiEl) romawiEl.textContent = romawi;
+      if(tahunEl) tahunEl.textContent = tahun;
+    }
     saveAll();
     pushHistory();
     return;
