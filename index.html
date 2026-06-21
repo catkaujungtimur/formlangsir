@@ -207,6 +207,7 @@
     .toolbar, .shift-tab-bar, .format-bar, .form-head-bar, .print-options-bar{ display:none; }
     .sheet{ border:none; padding:0; }
     .row-actions, .open-popup-row, .row-menu-wrap, .add-form-row{ display:none !important; }
+    .col-actions{ display:none !important; }
     input.cell, select.cell{ border:none !important; outline:none !important; }
     .meta input{ border-bottom:none; }
     .footnote-edit{ border:none; }
@@ -776,7 +777,7 @@ function renderTbody(form, fIdx, tbody){
           <button data-action="addrow-end" data-form="${fIdx}" data-block="${bIdx}" class="success">+ Baris</button>
         </div>
       </td>
-      <td>
+      <td class="col-actions">
         <div class="row-actions">
           <button data-action="delblock" data-form="${fIdx}" data-block="${bIdx}">Hapus</button>
         </div>
@@ -803,7 +804,7 @@ function renderTbody(form, fIdx, tbody){
         <td>
           <div class="editable-cell" contenteditable="true" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-ketcell="1" data-placeholder="contoh: C1: AMBIL 9 KRT EX 279" data-navcol="2">${escapeHtml(row.ket)}</div>
         </td>
-        <td class="row-menu-wrap">
+        <td class="row-menu-wrap col-actions">
           <button class="row-menu-btn" data-action="togglemenu" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-navcol="3">&#8942;</button>
           <div class="row-menu" data-menu-for="${fIdx}-${bIdx}-${rIdx}">
             <button data-action="insert-above" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}">Sisip baris di atas</button>
@@ -1305,9 +1306,15 @@ document.getElementById("btnReset").addEventListener("click", ()=>{
 
 document.getElementById("btnPrint").addEventListener("click", ()=>{
   applyPrintSetup();
-  // beri waktu 1 frame agar style & scale sempat diterapkan sebelum dialog print muncul
+  // Double rAF: frame pertama memastikan style baru sudah di-commit ke render tree,
+  // frame kedua memastikan browser sudah benar-benar reflow/repaint dengan layout baru
+  // SEBELUM window.print() membuat snapshot halaman. Single rAF kadang tidak cukup
+  // untuk perubahan height/transform yang besar, menyebabkan print engine masih
+  // memakai layout lama (gejala: halaman acak/tidak sesuai).
   requestAnimationFrame(()=>{
-    window.print();
+    requestAnimationFrame(()=>{
+      window.print();
+    });
   });
 });
 
@@ -1402,7 +1409,13 @@ function applyPrintSetup(){
   applyAutoFitScale();
 }
 
-window.addEventListener("beforeprint", applyPrintSetup);
+// CATATAN PENTING: applyPrintSetup() SENGAJA hanya dipanggil dari klik tombol
+// "Cetak / Simpan PDF" di atas (dengan requestAnimationFrame sebelum window.print()).
+// Sebelumnya ada juga listener "beforeprint" yang memanggil applyPrintSetup() lagi --
+// ini menyebabkan BUG: applyAutoFitScale() mereset dulu ke ukuran asli (besar) untuk
+// mengukur ulang, dan reset sesaat inilah yang sempat dibaca oleh print engine sebagai
+// layout final, sehingga hasil cetak jadi acak/pecah jadi beberapa halaman
+// (gejala: halaman kosong, halaman cuma judul, dst). Listener itu dihapus.
 window.addEventListener("afterprint", ()=>{
   // bersihkan scale setelah print supaya tampilan layar normal kembali
   document.querySelectorAll(".form-wrap").forEach(wrap=>{
