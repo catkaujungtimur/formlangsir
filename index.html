@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -60,6 +59,12 @@
   .format-bar select{ font-size:11px; padding:2px 4px; border:1px solid var(--muted); border-radius:2px; }
 
   .form-wrap{ margin-bottom:26px; }
+  /* Default: form baru = halaman baru (untuk mode "Biarkan natural").
+     Saat "Paksa 1 halaman" aktif, JS (applyAutoFitScale) akan meng-override ini
+     lewat inline style (page-break-before:auto) untuk form-form yang berhasil
+     digabung ke halaman form sebelumnya (kalau totalnya masih cukup muat setelah
+     di-shrink bersama), lalu mengembalikannya lagi setelah print selesai
+     (afterprint) supaya tampilan layar/mode lain tidak berubah. */
   .form-wrap:not(:first-child){ page-break-before:always; }
 
   .form-head-bar{ display:flex; justify-content:space-between; align-items:center; margin:14px 0 4px; }
@@ -1347,65 +1352,106 @@ function getPageContentWidthPx(){
 }
 
 function applyAutoFitScale(){
-  const sheets = document.querySelectorAll(".form-wrap > .sheet");
+  const wraps = Array.from(document.querySelectorAll(".form-wrap"));
   const pageHeightPx = getPageContentHeightPx();
   const pageWidthPx = getPageContentWidthPx();
 
-  sheets.forEach(sheet=>{
-    if(!printOptions.forceFit){
-      // mode natural: kembalikan ke ukuran normal
+  // Ambil .sheet dari tiap .form-wrap, sekaligus reset ke kondisi "normal" dulu
+  // (--fs:1, width = lebar kertas sesungguhnya) supaya semua pengukuran berikutnya akurat.
+  const items = wraps.map(wrap=>{
+    const sheet = wrap.querySelector(".sheet");
+    return { wrap, sheet };
+  }).filter(it=>it.sheet);
+
+  if(!printOptions.forceFit){
+    // mode natural: kembalikan semua ke ukuran normal & page-break default (form baru = halaman baru)
+    items.forEach(({wrap, sheet})=>{
       sheet.style.setProperty("--fs", "1");
       sheet.style.width = "";
-      return;
-    }
+      wrap.style.pageBreakBefore = "";
+    });
+    return;
+  }
 
-    // KUNCI PENTING: paksa lebar .sheet sesuai lebar halaman cetak SESUNGGUHNYA
-    // (bukan lebar layar/viewport saat ini, yang biasanya jauh lebih lebar).
-    // Tanpa ini, scrollHeight diukur dengan word-wrap teks kolom "Urutan Pergerakan
-    // Langsir"/"Keterangan" berdasarkan lebar layar penuh -- sehingga tinggi yang
-    // dihitung JS lebih KECIL dari tinggi sesungguhnya saat dicetak (di mana lebar
-    // kertas jauh lebih sempit, sehingga teks wrap jadi lebih banyak baris).
-    // Inilah sebab kontradiksi: log bilang "sudah pas 1047px" tapi tetap kepotong
-    // jadi 2 halaman saat benar-benar dicetak.
+  // Paksa lebar tiap .sheet sesuai lebar halaman cetak SESUNGGUHNYA (bukan lebar layar),
+  // supaya word-wrap teks terukur sama persis dengan kondisi nyata saat dicetak.
+  items.forEach(({sheet})=>{
     sheet.style.width = pageWidthPx + "px";
-
-    // Reset ke ukuran normal dulu supaya pengukuran tinggi alami akurat
     sheet.style.setProperty("--fs", "1");
-    const naturalHeight = sheet.scrollHeight;
-
-    if(naturalHeight <= pageHeightPx){
-      // sudah cukup 1 halaman, tidak perlu diperkecil
-      return;
-    }
-
-    // BINARY SEARCH faktor --fs (font-scale) yang tepat agar tinggi <= pageHeightPx.
-    // Tidak dipakai rumus linear (pageHeightPx / naturalHeight) karena mengecilkan
-    // font-size TIDAK mengecilkan tinggi secara linear -- ada border, padding tetap,
-    // line-height minimum, dan word-wrap teks yang berubah non-linear saat font
-    // mengecil (baris bisa "menyatu" jadi lebih sedikit baris). Binary search lebih
-    // akurat untuk kasus ini dan tetap cepat (cuma ~16 iterasi, masing-masing 1 reflow).
-    // Batas bawah dibuat SANGAT kecil (0.01) sesuai keputusan: selalu paksa 1 halaman
-    // apapun yang terjadi, walau font jadi sangat kecil, daripada terpotong ke halaman 2.
-    let lo = 0.01;
-    let hi = 1;
-    let best = lo;
-
-    for(let i=0; i<16; i++){
-      const mid = (lo + hi) / 2;
-      sheet.style.setProperty("--fs", String(mid));
-      const h = sheet.scrollHeight; // memaksa reflow synchronous, lalu baca hasilnya
-      if(h <= pageHeightPx){
-        best = mid;   // mid ini sudah cukup kecil (pas), coba yang lebih besar lagi (mendekati 1) untuk hasil paling optimal
-        lo = mid;
-      } else {
-        hi = mid;     // masih kepanjangan, perlu lebih kecil lagi
-      }
-    }
-
-    sheet.style.setProperty("--fs", String(best));
-    // Log untuk debugging: buka DevTools Console (F12) sebelum klik "Cetak" untuk lihat ini.
-    console.log(`[Fit 1 Halaman] lebar dipaksa: ${pageWidthPx.toFixed(0)}px, tinggi asli: ${naturalHeight}px, target maks: ${pageHeightPx.toFixed(0)}px, --fs terpilih: ${best.toFixed(4)}, tinggi akhir: ${sheet.scrollHeight}px`);
   });
+  // Ukur tinggi alami (--fs:1) tiap form SETELAH lebar dipaksa benar -- baris terpisah
+  // dari loop di atas supaya semua sheet sudah di-set width yang sama dulu sebelum
+  // browser mulai reflow satu-satu (menghindari reflow yang saling pengaruh antar sheet).
+  items.forEach(it=>{ it.naturalHeight = it.sheet.scrollHeight; });
+
+  // Cari --fs terbesar (mendekati 1 = paling kebaca) sehingga total tinggi suatu
+  // himpunan form (kalau di-shrink bersama dengan --fs yang sama) <= pageHeightPx.
+  // Dipakai baik untuk 1 form sendirian maupun beberapa form yang digabung.
+  function findFsForGroup(group){
+    // cek dulu apakah di --fs:1 (ukuran normal) sudah cukup tanpa perlu di-shrink
+    let totalAt1 = 0;
+    group.forEach(it=>{ it.sheet.style.setProperty("--fs","1"); totalAt1 += it.sheet.scrollHeight; });
+    if(totalAt1 <= pageHeightPx) return 1;
+
+    let lo = 0.01, hi = 1, best = lo;
+    for(let i=0; i<16; i++){
+      const mid = (lo+hi)/2;
+      let total = 0;
+      group.forEach(it=>{ it.sheet.style.setProperty("--fs", String(mid)); total += it.sheet.scrollHeight; });
+      if(total <= pageHeightPx){ best = mid; lo = mid; } else { hi = mid; }
+    }
+    return best;
+  }
+
+  // GREEDY GROUPING: coba tambahkan form satu-per-satu ke grup (halaman) saat ini.
+  // Kalau grup+form baru masih bisa di-shrink bersama sampai pas 1 halaman (--fs apapun,
+  // serendah 0.01), form itu ikut grup ini (digabung 1 halaman). Kalau tidak mungkin sama
+  // sekali (bahkan di --fs minimal masih kepanjangan), form itu jadi awal grup baru.
+  let currentGroup = [];
+
+  items.forEach((it, idx)=>{
+    const candidateGroup = [...currentGroup, it];
+    const fs = findFsForGroup(candidateGroup);
+    // findFsForGroup selalu mengembalikan SUATU nilai (minimal 0.01), jadi kita perlu
+    // verifikasi ulang apakah hasil di --fs minimal itu BENAR-BENAR cukup, bukan cuma
+    // "yang terbaik yang bisa dicapai tapi tetap kepanjangan".
+    let total = 0;
+    candidateGroup.forEach(g=>{ g.sheet.style.setProperty("--fs", String(fs)); total += g.sheet.scrollHeight; });
+    const fits = total <= pageHeightPx;
+
+    if(fits || currentGroup.length === 0){
+      // form ini ikut grup saat ini (entah karena pas, atau karena grup masih kosong --
+      // form sendirian pun harus tetap diproses meski tidak akan pernah "cukup", supaya
+      // tetap mendapat --fs yang sekecil-kecilnya sesuai keputusan "paksa 1 halaman").
+      currentGroup = candidateGroup;
+      currentGroup._fs = fs;
+    } else {
+      // tidak cukup walau di-shrink minimal -- tutup grup sebelumnya, mulai grup baru dari form ini
+      finalizeGroup(currentGroup);
+      currentGroup = [it];
+      currentGroup._fs = findFsForGroup(currentGroup);
+    }
+
+    if(idx === items.length-1) finalizeGroup(currentGroup);
+  });
+
+  function finalizeGroup(group){
+    if(!group || group.length===0) return;
+    const fs = group._fs ?? findFsForGroup(group);
+    group.forEach((it, i)=>{
+      it.sheet.style.setProperty("--fs", String(fs));
+      // Form pertama dalam grup: TETAP mulai halaman baru (kecuali dia form paling pertama
+      // di seluruh dokumen). Form berikutnya DALAM grup yang sama: jangan mulai halaman baru
+      // (supaya benar2 nempel di halaman yang sama dengan form sebelumnya dalam grup ini).
+      if(i === 0){
+        it.wrap.style.pageBreakBefore = ""; // ikut default CSS (always, kecuali first-child dokumen)
+      } else {
+        it.wrap.style.pageBreakBefore = "avoid";
+      }
+    });
+    const totalH = group.reduce((s,it)=>s+it.sheet.scrollHeight, 0);
+    console.log(`[Fit Halaman] grup ${group.length} form digabung, --fs: ${fs.toFixed(4)}, total tinggi: ${totalH.toFixed(0)}px / target ${pageHeightPx.toFixed(0)}px`);
+  }
 }
 
 function applyPrintSetup(){
@@ -1420,10 +1466,15 @@ function applyPrintSetup(){
 // dan reset sesaat itu sempat dibaca print engine sebagai layout final --
 // hasilnya halaman acak/tidak sesuai. Jangan tambahkan listener beforeprint lagi.
 window.addEventListener("afterprint", ()=>{
-  // bersihkan --fs dan width setelah print supaya tampilan layar normal kembali ke ukuran asli
-  document.querySelectorAll(".form-wrap > .sheet").forEach(sheet=>{
-    sheet.style.setProperty("--fs", "1");
-    sheet.style.width = "";
+  // bersihkan --fs, width, dan pageBreakBefore setelah print supaya tampilan layar
+  // normal kembali ke kondisi default (form baru = halaman baru, ukuran normal)
+  document.querySelectorAll(".form-wrap").forEach(wrap=>{
+    const sheet = wrap.querySelector(".sheet");
+    if(sheet){
+      sheet.style.setProperty("--fs", "1");
+      sheet.style.width = "";
+    }
+    wrap.style.pageBreakBefore = "";
   });
 });
 
