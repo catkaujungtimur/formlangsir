@@ -86,12 +86,16 @@
 
   .title{ text-align:center; font-weight:700; font-size:calc(17px * var(--fs)); letter-spacing:.02em; margin:0 0 2px; }
   .nomor{ text-align:center; font-size:calc(13px * var(--fs)); margin:0 0 calc(14px * var(--fs)); font-family:var(--mono); color:var(--accent); font-weight:600; }
+  .nomor.editable-cell{ width:auto; min-height:calc(18px * var(--fs)); padding:1px 4px; font-size:calc(13px * var(--fs)); font-family:var(--mono); }
+  .nomor.editable-cell:empty:before{ font-family:var(--mono); font-weight:600; }
 
-  .meta{ display:grid; grid-template-columns: 110px 1fr 90px 1fr; gap:calc(4px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(10px * var(--fs)); }
+  .meta{ display:grid; grid-template-columns: 110px auto 90px 1fr; gap:calc(4px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(10px * var(--fs)); align-items:center; }
   .meta label{ font-weight:700; }
   .meta .val{ font-family:var(--mono); }
   .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:calc(12.5px * var(--fs)); padding:calc(2px * var(--fs)) 2px; background:transparent; }
   .meta input:focus{ outline:none; border-bottom:1px solid var(--accent); }
+  .meta-right-label{ text-align:right; }
+  .meta-right-val{ max-width:220px; }
   .date-nav{ display:flex; align-items:center; gap:6px; }
   .date-arrow{
     border:1px solid var(--muted); background:var(--paper); color:var(--ink);
@@ -147,18 +151,27 @@
   .open-popup-row .hint{ display:block; margin-top:4px; }
 
   .footnote{ font-size:calc(11px * var(--fs)); margin-top:10px; line-height:1.5; }
+
+  /* .footer-block membungkus footnote + tabel tanda tangan jadi 1 kotak utuh
+     (garis kiri-kanan-atas-bawah menyatu), sesuai permintaan: kolom pergerakan
+     langsir dan tanda tangan masih satu bagian, jadi visualnya disatukan juga. */
+  .footer-block{
+    border:1px solid var(--ink); border-top:none; margin-top:0;
+  }
   .footnote-edit{
-    width:100%; min-height:50px; border:1px dashed var(--muted); font-family:var(--sans);
-    font-size:calc(11px * var(--fs)); padding:calc(6px * var(--fs)) 6px; margin-top:calc(8px * var(--fs)); background:transparent; cursor:text; white-space:pre-wrap;
+    width:100%; min-height:50px; font-family:var(--sans); text-align:center;
+    font-size:calc(11px * var(--fs)); padding:calc(6px * var(--fs)) 6px; background:transparent; cursor:text; white-space:pre-wrap;
   }
   .footnote-edit:focus{ outline:1px solid var(--accent); background:#fff; }
 
-  .sign-caption{ display:flex; width:100%; font-size:calc(11px * var(--fs)); font-weight:700; margin-top:calc(14px * var(--fs)); }
-  .sign-caption .cap-receive{ width:83.4%; border:1px solid var(--ink); border-bottom:none; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
-  .sign-caption .cap-order{ width:16.6%; border:1px solid var(--ink); border-left:none; border-bottom:none; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
+  .sign-caption{ display:flex; width:100%; font-size:calc(11px * var(--fs)); font-weight:700; border-top:1px solid var(--ink); }
+  .sign-caption .cap-receive{ width:83.4%; border-right:1px solid var(--ink); padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
+  .sign-caption .cap-order{ width:16.6%; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
 
-  .sign{ width:100%; border-collapse:collapse; font-size:calc(11.5px * var(--fs)); }
-  .sign td{ border:1px solid var(--ink); padding:calc(6px * var(--fs)) 8px; vertical-align:top; width:16.6%; }
+  .sign{ width:100%; border-collapse:collapse; font-size:calc(11.5px * var(--fs)); border-top:1px solid var(--ink); }
+  .sign td{ border:1px solid var(--ink); border-top:none; padding:calc(6px * var(--fs)) 8px; vertical-align:top; width:16.6%; text-align:center; }
+  .sign td:first-child{ border-left:none; }
+  .sign td:last-child{ border-right:none; }
   .sign-blank-row td{ height:calc(34px * var(--fs)); border-bottom:none; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
   .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); }
@@ -448,8 +461,7 @@ function emptyFormState(){
     inpEmplasemen: "KETAPANG",
     inpJamMulai: "",
     inpJamSelesai: "",
-    inpNomorUrut: "13",
-    inpKtg: "KTG",
+    inpNomorSurat: "",
     dateOffsetDays: 0,
     blocks: [ { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] } ],
     signatures: {},
@@ -552,15 +564,6 @@ function lookupRute(posAwal, posAkhir){
   return RUTE_INDEX[posAwal.trim()+"|"+posAkhir.trim()] || null;
 }
 
-function romawiBulan(m){
-  return ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][m];
-}
-function formatNomorSurat(form){
-  const no = (form.inpNomorUrut || "0").padStart(2,"0");
-  const kode = form.inpKtg || "KTG";
-  const d = new Date();
-  return `NOMOR: ${no}/${kode}/${romawiBulan(d.getMonth())}/${d.getFullYear()}`;
-}
 function formatHariTanggal(offsetDays){
   const hariNames = ["MINGGU","SENIN","SELASA","RABU","KAMIS","JUMAT","SABTU"];
   const d = new Date();
@@ -669,7 +672,7 @@ function renderForm(form, fIdx){
   sheet.className = "sheet";
   sheet.innerHTML = `
     <p class="title">FORM PERINTAH LANGSIR</p>
-    <p class="nomor">${formatNomorSurat(form)}</p>
+    <p class="nomor editable-cell" contenteditable="true" data-form="${fIdx}" data-nomorsurat="1" data-placeholder="NOMOR: ..">${escapeHtml(form.inpNomorSurat || "")}</p>
 
     <div class="meta">
       <label>Hari/Tanggal :</label>
@@ -678,18 +681,16 @@ function renderForm(form, fIdx){
         <span class="date-display">${formatHariTanggal(form.dateOffsetDays)}</span>
         <button class="date-arrow" data-action="date-next" data-form="${fIdx}" title="Maju 1 hari">&#9654;</button>
       </div>
-      <label>Emplasemen :</label>
-      <input class="cell" data-form="${fIdx}" data-metafield="inpEmplasemen" value="${escapeAttr(form.inpEmplasemen)}">
+      <label class="meta-right-label">Emplasemen :</label>
+      <input class="cell meta-right-val" data-form="${fIdx}" data-metafield="inpEmplasemen" value="${escapeAttr(form.inpEmplasemen)}">
 
       <label>Jam Mulai :</label>
       <input class="cell" data-form="${fIdx}" data-metafield="inpJamMulai" value="${escapeAttr(form.inpJamMulai)}" placeholder="contoh: 15.00">
-      <label></label>
-      <input class="cell" data-form="${fIdx}" data-metafield="inpNomorUrut" value="${escapeAttr(form.inpNomorUrut)}" placeholder="No. urut" style="font-family:var(--mono)">
+      <div></div><div></div>
 
       <label>Jam Selesai :</label>
       <input class="cell" data-form="${fIdx}" data-metafield="inpJamSelesai" value="${escapeAttr(form.inpJamSelesai)}" placeholder="contoh: 16.30">
-      <label></label>
-      <input class="cell" data-form="${fIdx}" data-metafield="inpKtg" value="${escapeAttr(form.inpKtg)}" placeholder="Kode" style="font-family:var(--mono)">
+      <div></div><div></div>
     </div>
 
     <table class="main">
@@ -714,24 +715,26 @@ function renderForm(form, fIdx){
       </tfoot>
     </table>
 
-    <div class="footnote-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-foot="1" data-placeholder="Catatan kaki...">${escapeHtml(form.footnote)}</div>
+    <div class="footer-block">
+      <div class="footnote-edit editable-cell" contenteditable="true" data-form="${fIdx}" data-foot="1" data-placeholder="Catatan kaki...">${escapeHtml(form.footnote)}</div>
 
-    <div class="sign-caption">
-      <span class="cap-receive">Yang Menerima Perintah</span>
-      <span class="cap-order">Yang Memerintah</span>
+      <div class="sign-caption">
+        <span class="cap-receive">Yang Menerima Perintah</span>
+        <span class="cap-order">Yang Memerintah</span>
+      </div>
+      <table class="sign">
+        <tr>
+          <td class="role">PLR 1</td>
+          <td class="role">PLR 2</td>
+          <td class="role">PLR DIPO</td>
+          <td class="role">MASINIS/ASMAS</td>
+          <td class="role">SCHOWING</td>
+          <td class="role">PPKA</td>
+        </tr>
+        <tr class="sign-blank-row"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr data-signrow-for="${fIdx}"></tr>
+      </table>
     </div>
-    <table class="sign">
-      <tr>
-        <td class="role">PLR 1</td>
-        <td class="role">PLR 2</td>
-        <td class="role">PLR DIPO</td>
-        <td class="role">MASINIS/ASMAS</td>
-        <td class="role">SCHOWING</td>
-        <td class="role">PPKA</td>
-      </tr>
-      <tr class="sign-blank-row"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-      <tr data-signrow-for="${fIdx}"></tr>
-    </table>
   `;
   wrap.appendChild(sheet);
 
@@ -901,15 +904,10 @@ document.getElementById("globalFontFamily").addEventListener("change", e=>{
 document.getElementById("formsContainer").addEventListener("input", e=>{
   const t = e.target;
 
-  // meta input (emplasemen, jam, nomor urut, kode)
+  // meta input (emplasemen, jam)
   if(t.dataset.metafield){
     const fIdx = parseInt(t.dataset.form,10);
     shiftState.forms[fIdx][t.dataset.metafield] = t.value;
-    // update nomor surat tampilan tanpa full re-render (cari elemen .nomor terdekat)
-    const sheetEl = t.closest(".sheet");
-    if(sheetEl){
-      sheetEl.querySelector(".nomor").textContent = formatNomorSurat(shiftState.forms[fIdx]);
-    }
     saveAll();
     pushHistoryDebounced();
     return;
@@ -975,6 +973,13 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
   if(t.dataset.foot !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
     shiftState.forms[fIdx].footnote = t.textContent;
+    saveAll();
+    pushHistoryDebounced();
+    return;
+  }
+  if(t.dataset.nomorsurat !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    shiftState.forms[fIdx].inpNomorSurat = t.textContent;
     saveAll();
     pushHistoryDebounced();
     return;
