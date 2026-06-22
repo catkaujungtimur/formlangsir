@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -189,6 +191,26 @@
   .sign select:focus{ outline:none; border-bottom:1px solid var(--accent); }
   .sign .nipp-display{ font-size:calc(11.5px * var(--fs)); padding:2px 0; }
 
+  /* ---- Combo box custom kolom nama TTD: input bebas + daftar saran ---- */
+  .ttd-combo{ position:relative; flex:1; min-width:0; }
+  .ttd-name-input{
+    width:100%; flex:1; min-width:0; font-family:var(--sans); font-size:calc(11.5px * var(--fs));
+    border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0;
+  }
+  .ttd-name-input:focus{ outline:none; border-bottom:1px solid var(--accent); }
+  .ttd-suggest-list{
+    display:none; position:absolute; left:0; top:100%; z-index:50; min-width:180px; max-width:260px;
+    background:#fff; border:1px solid var(--ink); box-shadow:0 4px 12px rgba(0,0,0,.18);
+    max-height:200px; overflow-y:auto; text-align:left;
+  }
+  .ttd-suggest-list.open{ display:block; }
+  .ttd-suggest-item{
+    padding:5px 9px; font-size:12px; cursor:pointer; display:flex; justify-content:space-between; gap:8px;
+    white-space:nowrap;
+  }
+  .ttd-suggest-item:hover{ background:var(--accent-soft); }
+  .ttd-suggest-nipp{ font-family:var(--mono); color:var(--muted); font-size:11px; }
+
   .hint{ font-size:10.5px; color:var(--muted); }
 
 
@@ -230,7 +252,7 @@
     .modal-overlay, .modal-box{ display:none !important; }
     .editable-cell:focus, .block-name-edit:focus{ outline:none !important; background:transparent !important; }
     .form-wrap{ page-break-inside: avoid; break-inside: avoid; }
-    .sign select{ display:none !important; }
+    .ttd-combo{ display:none !important; }
     .name-print-only{ display:inline !important; }
   }
 
@@ -458,7 +480,7 @@ const TTD_FALLBACK = {
   "A FADLI": "53595",
 };
 let TTD = { ...TTD_FALLBACK };
-const TTD_DATA_URL = "https://catkaujungtimur.github.io/inputpegawai/data.json";
+const TTD_DATA_URL = "https://catkaujungtimur.github.io/inputttd/data.json";
 
 const DEFAULT_FOOTNOTE =
 `"KEC LANGSIR MAX 30 KM/JAM" (LANGSIR MELEWATI PERON/DI JALUR PUTAR/DI JALUR BONGKAR MAX 5 KM/JAM)
@@ -873,16 +895,18 @@ function renderSignRow(form, fIdx, tr){
     // (mis. daftar baru saja diperbarui dari GitHub dengan penulisan yang berbeda),
     // tetap tampilkan sebagai opsi supaya pilihan yang sudah ada tidak terlihat hilang.
     const namesForThisRole = (current && !names.includes(current)) ? [current, ...names] : names;
-    const options = [`<option value="">— pilih nama —</option>`]
-      .concat(namesForThisRole.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
-      .join("");
     const td = document.createElement("td");
     td.className = "sign-namecell";
     td.innerHTML = `
       <div class="sign-namecell-inner">
         <div class="name-row">
           <span class="field-label">Nama:</span>
-          <select data-form="${fIdx}" data-role="${escapeAttr(role)}">${options}</select>
+          <div class="ttd-combo">
+            <input type="text" class="ttd-name-input" value="${escapeAttr(current)}"
+                   placeholder="ketik nama atau NIPP..." autocomplete="off"
+                   data-form="${fIdx}" data-role="${escapeAttr(role)}">
+            <div class="ttd-suggest-list" data-suggest-for="${fIdx}|${escapeAttr(role)}"></div>
+          </div>
           <span class="name-print-only">${escapeHtml(current)}</span>
         </div>
         <div class="name-row">
@@ -891,6 +915,8 @@ function renderSignRow(form, fIdx, tr){
         </div>
       </div>
     `;
+    // simpan daftar nama yang valid untuk role ini di dataset, dibaca lagi oleh handler saran
+    td.querySelector(".ttd-name-input").dataset.namesJson = JSON.stringify(namesForThisRole);
     tr.appendChild(td);
   });
 }
@@ -1408,12 +1434,117 @@ document.addEventListener("click", e=>{
 
 document.getElementById("formsContainer").addEventListener("change", e=>{
   const t = e.target;
-  if(t.dataset.role !== undefined){
+  if(t.dataset.role !== undefined && t.tagName !== "INPUT"){
     const fIdx = parseInt(t.dataset.form,10);
     shiftState.forms[fIdx].signatures[t.dataset.role] = t.value;
     render();
   }
 });
+
+/* ---- Kolom nama TTD (tanda tangan): ketik bebas nama atau NIPP, dengan saran ---- */
+function ttdSuggestEl(fIdx, role){
+  return document.querySelector(`.ttd-suggest-list[data-suggest-for="${fIdx}|${role}"]`);
+}
+function ttdFilterNames(namesList, query){
+  const q = query.trim().toUpperCase();
+  if(!q) return namesList.slice(0, 8);
+  return namesList.filter(n=>{
+    const nipp = TTD[n] || "";
+    return n.toUpperCase().includes(q) || nipp.includes(q);
+  }).slice(0, 8);
+}
+function ttdRenderSuggestions(input){
+  const fIdx = input.dataset.form;
+  const role = input.dataset.role;
+  const box = ttdSuggestEl(fIdx, role);
+  if(!box) return;
+  let namesList = [];
+  try{ namesList = JSON.parse(input.dataset.namesJson || "[]"); }catch(e){}
+  const matches = ttdFilterNames(namesList, input.value);
+  if(matches.length === 0){
+    box.innerHTML = "";
+    box.classList.remove("open");
+    return;
+  }
+  box.innerHTML = matches.map(n=>{
+    const nipp = TTD[n] || "";
+    return `<div class="ttd-suggest-item" data-pick="${escapeAttr(n)}">${escapeHtml(n)}${nipp ? ` <span class="ttd-suggest-nipp">${escapeHtml(nipp)}</span>` : ""}</div>`;
+  }).join("");
+  box.classList.add("open");
+}
+function ttdCommitValue(input, value){
+  const fIdx = parseInt(input.dataset.form, 10);
+  const role = input.dataset.role;
+  shiftState.forms[fIdx].signatures[role] = value;
+  input.value = value;
+  const box = ttdSuggestEl(fIdx, role);
+  if(box){ box.innerHTML = ""; box.classList.remove("open"); }
+  // hanya butuh refresh nipp-display & teks print-only di sel ini, bukan full render
+  // (full render akan memutus fokus & bisa menutup saran yang lain di tengah pengetikan)
+  const td = input.closest(".sign-namecell");
+  if(td){
+    const nippEl = td.querySelector(".nipp-display");
+    if(nippEl) nippEl.textContent = TTD[value] || "";
+    const printEl = td.querySelector(".name-print-only");
+    if(printEl) printEl.textContent = value;
+  }
+  saveAll();
+  pushHistoryDebounced();
+}
+
+document.getElementById("formsContainer").addEventListener("input", e=>{
+  const t = e.target;
+  if(t.classList && t.classList.contains("ttd-name-input")){
+    ttdRenderSuggestions(t);
+  }
+});
+
+document.getElementById("formsContainer").addEventListener("click", e=>{
+  const item = e.target.closest(".ttd-suggest-item");
+  if(item){
+    const input = item.closest(".ttd-combo").querySelector(".ttd-name-input");
+    ttdCommitValue(input, item.dataset.pick);
+    return;
+  }
+  // klik di luar kotak ttd-combo manapun -> tutup semua saran yang masih terbuka
+  if(!e.target.closest(".ttd-combo")){
+    document.querySelectorAll(".ttd-suggest-list.open").forEach(b=>{ b.innerHTML=""; b.classList.remove("open"); });
+  }
+});
+
+document.getElementById("formsContainer").addEventListener("focus", e=>{
+  const t = e.target;
+  if(t.classList && t.classList.contains("ttd-name-input")){
+    ttdRenderSuggestions(t);
+  }
+}, true);
+
+document.getElementById("formsContainer").addEventListener("blur", e=>{
+  const t = e.target;
+  if(!(t.classList && t.classList.contains("ttd-name-input"))) return;
+  // beri waktu 1 frame supaya klik pada item saran (yang juga memicu blur) tetap terproses dulu
+  setTimeout(()=>{
+    const box = ttdSuggestEl(t.dataset.form, t.dataset.role);
+    if(box){ box.innerHTML = ""; box.classList.remove("open"); }
+
+    const typed = t.value.trim();
+    let namesList = [];
+    try{ namesList = JSON.parse(t.dataset.namesJson || "[]"); }catch(err){}
+    const exactMatch = namesList.find(n => n.toUpperCase() === typed.toUpperCase());
+
+    if(typed === ""){
+      ttdCommitValue(t, "");
+    } else if(exactMatch){
+      ttdCommitValue(t, exactMatch);
+    } else {
+      // ketikan tidak cocok persis dengan nama manapun di daftar -- jangan diam-diam
+      // menyimpan teks bebas sebagai "nama resmi" (NIPP-nya tidak akan pernah ketemu).
+      // Kembalikan ke nilai tersimpan terakhir yang valid supaya kolom NIPP tetap akurat.
+      const lastValid = shiftState.forms[parseInt(t.dataset.form,10)].signatures[t.dataset.role] || "";
+      t.value = lastValid;
+    }
+  }, 150);
+}, true);
 
 document.getElementById("btnAddForm").addEventListener("click", ()=>{
   shiftState.forms.push(emptyFormState());
