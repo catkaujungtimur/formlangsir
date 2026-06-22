@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -635,17 +633,23 @@ function recomputeChain(rows, posisiAwalPertama){
 }
 
 function computeLokoLabels(rows){
+  // Label "Rangkaian/No Kereta/Gerbong" pada baris ke-i merepresentasikan apa yang
+  // dibawa loko di "Posisi Awal Di Jalur" baris ke-i -- yaitu HASIL ambil/lepas dari
+  // baris SEBELUMNYA, bukan hasil ambil/lepas baris itu sendiri. Karena itu label
+  // dulu dibaca dari prevTotal (sebelum baris ini diterapkan), baru sesudahnya
+  // prevTotal diperbarui untuk dipakai sebagai label baris berikutnya.
   let prevTotal = 0;
   return rows.map(r=>{
+    const label = "LOKO" + (prevTotal > 0 ? ` + ${prevTotal} KERETA` : "");
+
     const ket = extractTextAfterLabel(r.ket).toUpperCase();
     let ambil = 0, lepas = 0, lepasSemua = false;
     const mAmbil = ket.match(/AMBIL\s+(\d+)\s*KRT/);
     if(mAmbil) ambil = parseInt(mAmbil[1],10);
     if(ket.includes("LEPAS SEMUA")){ lepasSemua = true; }
     else { const mLepas = ket.match(/LEPAS\s+(\d+)\s*KRT/); if(mLepas) lepas = parseInt(mLepas[1],10); }
-    let newTotal = lepasSemua ? 0 : (prevTotal + ambil - lepas);
-    const label = "LOKO" + (newTotal > 0 ? ` + ${newTotal} KERETA` : "");
-    prevTotal = newTotal;
+    prevTotal = lepasSemua ? 0 : (prevTotal + ambil - lepas);
+
     return label;
   });
 }
