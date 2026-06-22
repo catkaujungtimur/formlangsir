@@ -446,7 +446,10 @@ const RUTE = [
 ["J.II","JP","J.II-JP","7,8,11,13,15,16,17"],
 ];
 
-const TTD = {
+// TTD: { NAMA: NIPP }. Sumber utamanya adalah data.json di repo GitHub (lihat loadTTDFromGithub()),
+// supaya daftar nama/NIPP tidak perlu di-hardcode di sini dan bisa dikelola lewat halaman
+// input terpisah. Daftar di bawah ini cuma FALLBACK kalau koneksi ke GitHub gagal (offline dll).
+const TTD_FALLBACK = {
   "LISTIANTO": "64668",
   "AGUNG": "77520",
   "AINUN": "50900178",
@@ -454,6 +457,8 @@ const TTD = {
   "SUHARTOYO": "53632",
   "A FADLI": "53595",
 };
+let TTD = { ...TTD_FALLBACK };
+const TTD_DATA_URL = "https://catkaujungtimur.github.io/inputpegawai/data.json";
 
 const DEFAULT_FOOTNOTE =
 `"KEC LANGSIR MAX 30 KM/JAM" (LANGSIR MELEWATI PERON/DI JALUR PUTAR/DI JALUR BONGKAR MAX 5 KM/JAM)
@@ -864,8 +869,12 @@ function renderSignRow(form, fIdx, tr){
   ROLES.forEach(role=>{
     const current = form.signatures[role] || "";
     const nipp = TTD[current] || "";
+    // kalau nama yang sudah tersimpan di form ini tidak (lagi) ada di daftar TTD terkini
+    // (mis. daftar baru saja diperbarui dari GitHub dengan penulisan yang berbeda),
+    // tetap tampilkan sebagai opsi supaya pilihan yang sudah ada tidak terlihat hilang.
+    const namesForThisRole = (current && !names.includes(current)) ? [current, ...names] : names;
     const options = [`<option value="">— pilih nama —</option>`]
-      .concat(names.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
+      .concat(namesForThisRole.map(n=>`<option value="${escapeAttr(n)}" ${n===current?"selected":""}>${escapeAttr(n)}</option>`))
       .join("");
     const td = document.createElement("td");
     td.className = "sign-namecell";
@@ -1822,9 +1831,36 @@ document.addEventListener("keydown", e=>{
   }
 });
 
+// Mengambil daftar nama/NIPP dari repo GitHub (dikelola lewat halaman input terpisah).
+// Kalau gagal (offline, repo belum ada datanya, dll), TTD tetap memakai TTD_FALLBACK
+// yang sudah diisi di awal -- form tetap bisa dipakai, hanya daftar nama yang lebih sedikit.
+async function loadTTDFromGithub(){
+  try{
+    const res = await fetch(TTD_DATA_URL, { cache: "no-store" });
+    if(!res.ok) return; // diam-diam tetap pakai fallback
+    const json = await res.json();
+    if(!json || !Array.isArray(json.orang)) return;
+    const fresh = {};
+    json.orang.forEach(o=>{
+      if(o && o.nama) fresh[o.nama] = o.nipp || "";
+    });
+    if(Object.keys(fresh).length === 0) return; // data.json kosong -> tetap pakai fallback
+    TTD = fresh;
+    // refresh hanya baris tanda tangan di semua form, tanpa full re-render
+    // (supaya tidak mengganggu fokus/kursor kalau user sedang mengetik di tempat lain)
+    shiftState.forms.forEach((form, fIdx)=>{
+      const tr = document.querySelector(`[data-signrow-for="${fIdx}"]`);
+      if(tr) renderSignRow(form, fIdx, tr);
+    });
+  }catch(e){
+    // gagal terhubung -> diam-diam tetap pakai TTD_FALLBACK, tidak perlu mengganggu user
+  }
+}
+
 /* ============== init ============== */
 loadAll();
 render();
+loadTTDFromGithub();
 pushHistory(); // simpan state awal sebagai titik undo paling awal
 </script>
 </body>
