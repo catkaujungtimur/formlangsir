@@ -10,6 +10,7 @@
   :root{
     --ink:#1a1a1a;
     --paper:#ffffff;
+    --border:#d9d4cc;
     --line:#000000;
     --muted:#6b6b6b;
     --accent:#8a1f1f;
@@ -283,76 +284,182 @@
     table.main{ font-size:10.5px; }
     .modal-box{ width:94vw; }
   }
+
+  /* ================= TAB: INPUT PEGAWAI ================= */
+  .shift-tab.tab-pegawai{ border-color:var(--accent); }
+  .shift-tab.tab-pegawai.active{ background:var(--accent); color:#fff; }
+
+  .pegawai-wrap{ max-width:980px; margin:0 auto; }
+  .pegawai-wrap code{ background:var(--panel); padding:1px 5px; border-radius:3px; font-family:var(--mono); }
+
+  .pg-status-bar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    border:1px solid var(--border); border-radius:6px; padding:10px 14px; margin-bottom:18px;
+    font-size:12.5px; background:#fff;
+  }
+  .pg-status-dot{ width:8px; height:8px; border-radius:50%; background:var(--muted); flex-shrink:0; }
+  .pg-status-dot.connected{ background:#2f6b3e; }
+  .pg-status-dot.error{ background:var(--accent); }
+  .pg-status-bar .pg-status-msg{ flex:1; min-width:200px; }
+  .pg-linklike{
+    background:none; border:none; color:var(--accent); text-decoration:underline;
+    cursor:pointer; font-size:12.5px; padding:0; font-family:inherit;
+  }
+
+  .pg-card{
+    background:#fff; border:1px solid var(--border); border-radius:8px;
+    padding:18px 20px; margin-bottom:18px;
+  }
+  .pg-card h2{
+    font-size:14px; font-weight:700; margin:0 0 4px; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--accent);
+  }
+  .pg-hint{ color:var(--muted); font-size:12px; margin:0 0 14px; line-height:1.5; }
+
+  .pg-token-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pg-token-row input{ flex:1; min-width:220px; }
+
+  .pg-field-label{ display:block; font-size:11.5px; color:var(--muted); margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+
+  .pegawai-wrap input[type="text"], .pegawai-wrap input[type="password"], .pegawai-wrap select, .pegawai-wrap textarea{
+    width:100%; border:1px solid var(--border); border-radius:5px; padding:8px 10px;
+    font-size:13.5px; font-family:var(--sans); background:var(--paper); color:var(--ink);
+  }
+  .pegawai-wrap input:focus, .pegawai-wrap select:focus, .pegawai-wrap textarea:focus{
+    outline:none; border-color:var(--accent);
+  }
+  .pegawai-wrap textarea{ font-family:var(--mono); font-size:12.5px; line-height:1.5; resize:vertical; }
+
+  .pg-form-grid{ display:grid; grid-template-columns: 140px 1fr 200px auto; gap:10px; align-items:end; }
+  @media (max-width:720px){ .pg-form-grid{ grid-template-columns: 1fr 1fr; } }
+
+  .pg-jabatan-row{ display:flex; gap:6px; }
+  .pg-jabatan-row select{ flex:1; }
+
+  .pegawai-wrap button{
+    font-family:var(--sans); font-size:13px; font-weight:600; cursor:pointer;
+    border-radius:5px; border:1px solid var(--ink); background:var(--ink); color:#fff;
+    padding:8px 14px; line-height:1.2; transition:opacity .15s;
+  }
+  .pegawai-wrap button:hover{ opacity:.85; }
+  .pegawai-wrap button:disabled{ opacity:.4; cursor:not-allowed; }
+  .pegawai-wrap button.pg-ghost{ background:transparent; color:var(--ink); border:1px solid var(--border); }
+  .pegawai-wrap button.pg-danger{ background:var(--accent); border-color:var(--accent); }
+  .pegawai-wrap button.pg-success{ background:#2f6b3e; border-color:#2f6b3e; }
+  .pegawai-wrap button.pg-small{ padding:5px 9px; font-size:11.5px; }
+
+  .pg-actions-row{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+  table.pg-data{ width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+  table.pg-data th, table.pg-data td{ border-bottom:1px solid var(--border); padding:7px 8px; text-align:left; }
+  table.pg-data th{
+    font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted);
+    font-weight:600; border-bottom:2px solid var(--ink);
+  }
+  table.pg-data td.pg-nipp{ font-family:var(--mono); white-space:nowrap; }
+  table.pg-data tr:hover td{ background:var(--accent-soft); }
+  table.pg-data td.pg-col-actions{ text-align:right; white-space:nowrap; }
+
+  .pg-empty-state{ color:var(--muted); font-size:13px; text-align:center; padding:30px 0; }
+
+  .pg-badge{
+    display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px;
+    border-radius:10px; background:var(--accent-soft); color:var(--accent);
+    font-family:var(--mono); letter-spacing:.02em;
+  }
+
+  .pg-toast-stack{ position:fixed; bottom:18px; right:18px; display:flex; flex-direction:column; gap:8px; z-index:500; }
+  .pg-toast{
+    background:var(--ink); color:#fff; padding:10px 16px; border-radius:6px; font-size:13px;
+    box-shadow:0 4px 14px rgba(0,0,0,.2); max-width:320px;
+  }
+  .pg-toast.error{ background:var(--accent); }
+  .pg-toast.success{ background:#2f6b3e; }
+
+  .pg-count-pill{ font-family:var(--mono); color:var(--muted); font-size:12px; }
+
+  .pg-search-row{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .pg-search-row input{ flex:1; min-width:160px; }
+  .pg-search-row select{ width:auto; min-width:140px; }
+
+  .pg-help summary{ cursor:pointer; font-size:12.5px; color:var(--accent); font-weight:600; }
+  .pg-help{ margin-top:10px; }
+  .pg-help .pg-help-body{ font-size:12px; color:var(--muted); line-height:1.6; margin-top:8px; }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <div class="toolbar">
-    <div>
-      <h1>Form Perintah Langsir &mdash; Generator</h1>
-      <div class="sub">Klik "Edit Keterangan" untuk paste massal dari simulator. Blok teks manual (nama rangkaian, keterangan, catatan kaki) untuk ubah font/ukuran. Geser tepi kolom header untuk atur lebar.</div>
-    </div>
-    <div class="btns">
-      <button id="btnUndo" class="small ghost" title="Urungkan (Ctrl+Z)" disabled>&#8630; Undo</button>
-      <button id="btnRedo" class="small ghost" title="Ulangi (Ctrl+Y)" disabled>&#8631; Redo</button>
-      <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
-      <button id="btnExportShift" class="tiny ghost">Export</button>
-      <button id="btnImportShift" class="tiny ghost">Import</button>
-      <input type="file" id="fileImport" accept=".json" style="display:none">
-    </div>
-  </div>
-
   <div class="shift-tab-bar">
     <div class="shift-tabs" id="shiftTabs"></div>
-    <div class="shift-actions">
+    <div class="shift-actions" id="shiftActionsNormal">
       <button id="btnReset" class="ghost small">Reset shift ini</button>
     </div>
   </div>
 
-  <div class="format-bar">
-    <div class="grp">
-      <label>Font kolom otomatis (LOKO &amp; Urutan Pergerakan):</label>
-      <select id="globalFontFamily">
-        <option value="'JetBrains Mono','Courier New',monospace">Monospace</option>
-        <option value="'IBM Plex Sans',Arial,sans-serif">Sans</option>
-        <option value="Georgia,serif">Serif</option>
-      </select>
+  <div id="formLangsirUi">
+    <div class="toolbar">
+      <div>
+        <h1>Form Perintah Langsir &mdash; Generator</h1>
+        <div class="sub">Klik "Edit Keterangan" untuk paste massal dari simulator. Blok teks manual (nama rangkaian, keterangan, catatan kaki) untuk ubah font/ukuran. Geser tepi kolom header untuk atur lebar.</div>
+      </div>
+      <div class="btns">
+        <button id="btnUndo" class="small ghost" title="Urungkan (Ctrl+Z)" disabled>&#8630; Undo</button>
+        <button id="btnRedo" class="small ghost" title="Ulangi (Ctrl+Y)" disabled>&#8631; Redo</button>
+        <button id="btnPrint" class="primary">Cetak / Simpan PDF</button>
+        <button id="btnExportShift" class="tiny ghost">Export</button>
+        <button id="btnImportShift" class="tiny ghost">Import</button>
+        <input type="file" id="fileImport" accept=".json" style="display:none">
+      </div>
     </div>
-    <div class="grp">
-      <button id="btnResetColWidths" class="ghost small">Reset Lebar Kolom</button>
+
+    <div class="format-bar">
+      <div class="grp">
+        <label>Font kolom otomatis (LOKO &amp; Urutan Pergerakan):</label>
+        <select id="globalFontFamily">
+          <option value="'JetBrains Mono','Courier New',monospace">Monospace</option>
+          <option value="'IBM Plex Sans',Arial,sans-serif">Sans</option>
+          <option value="Georgia,serif">Serif</option>
+        </select>
+      </div>
+      <div class="grp">
+        <button id="btnResetColWidths" class="ghost small">Reset Lebar Kolom</button>
+      </div>
+    </div>
+
+    <div class="print-options-bar">
+      <div class="grp">
+        <label>Ukuran kertas:</label>
+        <select id="printPaperSize">
+          <option value="continuous">Continuous Form 9.5&times;11 in</option>
+          <option value="a4">A4</option>
+        </select>
+      </div>
+      <div class="radio-grp">
+        <label><input type="radio" name="printFit" id="printFit1" value="1"> Paksa 1 halaman per form</label>
+        <label><input type="radio" name="printFit" id="printFit2" value="0" checked> Biarkan natural (boleh lebih dari 1 halaman)</label>
+      </div>
+      <div class="grp font-volume-grp" id="fontVolumeGrp">
+        <label>Ukuran tulisan hasil cetak:</label>
+        <button type="button" id="fsVolDown" class="small ghost" title="Perkecil tulisan">&minus;</button>
+        <span id="fsVolIndicator" class="fs-vol-indicator">0</span>
+        <button type="button" id="fsVolUp" class="small ghost" title="Perbesar tulisan">+</button>
+        <button type="button" id="fsVolReset" class="small ghost" title="Kembali ke otomatis">Reset</button>
+        <button type="button" id="fsPreviewClose" class="small ghost" title="Keluar dari mode preview, kembali ke tampilan layar normal">Tutup Preview</button>
+      </div>
+    </div>
+
+    <div id="formsContainer"></div>
+
+    <div class="add-form-row">
+      <button id="btnAddForm" class="primary">+ Tambah Form Langsir</button>
+      <div class="hint">Membuat form baru (nomor surat, jam, rangkaian, tanda tangan terpisah) dalam shift yang sama. Semua form tercetak berurutan, masing-masing di halaman baru.</div>
     </div>
   </div>
 
-  <div class="print-options-bar">
-    <div class="grp">
-      <label>Ukuran kertas:</label>
-      <select id="printPaperSize">
-        <option value="continuous">Continuous Form 9.5&times;11 in</option>
-        <option value="a4">A4</option>
-      </select>
-    </div>
-    <div class="radio-grp">
-      <label><input type="radio" name="printFit" id="printFit1" value="1"> Paksa 1 halaman per form</label>
-      <label><input type="radio" name="printFit" id="printFit2" value="0" checked> Biarkan natural (boleh lebih dari 1 halaman)</label>
-    </div>
-    <div class="grp font-volume-grp" id="fontVolumeGrp">
-      <label>Ukuran tulisan hasil cetak:</label>
-      <button type="button" id="fsVolDown" class="small ghost" title="Perkecil tulisan">&minus;</button>
-      <span id="fsVolIndicator" class="fs-vol-indicator">0</span>
-      <button type="button" id="fsVolUp" class="small ghost" title="Perbesar tulisan">+</button>
-      <button type="button" id="fsVolReset" class="small ghost" title="Kembali ke otomatis">Reset</button>
-      <button type="button" id="fsPreviewClose" class="small ghost" title="Keluar dari mode preview, kembali ke tampilan layar normal">Tutup Preview</button>
-    </div>
-  </div>
-
-  <div id="formsContainer"></div>
-
-  <div class="add-form-row">
-    <button id="btnAddForm" class="primary">+ Tambah Form Langsir</button>
-    <div class="hint">Membuat form baru (nomor surat, jam, rangkaian, tanda tangan terpisah) dalam shift yang sama. Semua form tercetak berurutan, masing-masing di halaman baru.</div>
-  </div>
+  <div id="pegawaiPanel" style="display:none;"></div>
 </div>
+
 
 <!-- ===== Modal popup Edit Keterangan (draggable) ===== -->
 <div class="modal-overlay" id="modalOverlay"></div>
@@ -480,7 +587,7 @@ const TTD_FALLBACK = {
   "A FADLI": "53595",
 };
 let TTD = { ...TTD_FALLBACK };
-const TTD_DATA_URL = "https://catkaujungtimur.github.io/inputpegawai/data.json";
+const TTD_DATA_URL = "https://catkaujungtimur.github.io/inputttd/data.json";
 
 const DEFAULT_FOOTNOTE =
 `"KEC LANGSIR MAX 30 KM/JAM" (LANGSIR MELEWATI PERON/DI JALUR PUTAR/DI JALUR BONGKAR MAX 5 KM/JAM)
@@ -495,6 +602,10 @@ const SHIFTS = [
   {id:"siang", label:"Dinas Siang"},
   {id:"pagi",  label:"Dinas Pagi"},
 ];
+// Tab "Input Pegawai" bukan shift sungguhan (tidak punya forms/blocks) -- ini cuma
+// mode tampilan terpisah untuk mengelola data nama/NIPP/jabatan yang dipakai di kolom
+// tanda tangan. Ditaruh di array sendiri supaya tidak ikut logika shiftState/forms.
+const SPECIAL_TAB = {id:"pegawai", label:"Input Pegawai"};
 
 function emptyFormState(){
   return {
@@ -924,6 +1035,13 @@ function renderSignRow(form, fIdx, tr){
 function renderTabs(){
   const wrap = document.getElementById("shiftTabs");
   wrap.innerHTML = "";
+
+  const pegawaiDiv = document.createElement("div");
+  pegawaiDiv.className = "shift-tab tab-pegawai" + (activeShift === SPECIAL_TAB.id ? " active" : "");
+  pegawaiDiv.textContent = SPECIAL_TAB.label;
+  pegawaiDiv.dataset.shift = SPECIAL_TAB.id;
+  wrap.appendChild(pegawaiDiv);
+
   SHIFTS.forEach(s=>{
     const div = document.createElement("div");
     div.className = "shift-tab" + (s.id === activeShift ? " active" : "");
@@ -954,7 +1072,11 @@ function applyColWidths(){
 
 function saveAll(){
   try{
-    allShifts[activeShift] = shiftState;
+    // tab "Input Pegawai" bukan shift sungguhan -- jangan timpa allShifts dengan
+    // shiftState (shift terakhir yang aktif sebelumnya) kalau lagi di tab ini.
+    if(activeShift !== SPECIAL_TAB.id){
+      allShifts[activeShift] = shiftState;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeShift, allShifts, globalFormat, colWidths, printOptions }));
   }catch(e){}
 }
@@ -978,12 +1100,33 @@ function loadAll(){
       if(f.inpNomorAwal === undefined) f.inpNomorAwal = "";
     });
   });
-  shiftState = allShifts[activeShift];
+  shiftState = allShifts[activeShift] || allShifts["malam"];
 }
 function switchShift(shiftId){
   activeShift = shiftId;
+  if(shiftId === SPECIAL_TAB.id){
+    // tab Input Pegawai: bukan shift sungguhan, jangan ubah shiftState.
+    // cukup render ulang tab bar (utk highlight aktif) & toggle visibility panel.
+    renderTabs();
+    updatePanelVisibility();
+    saveAll();
+    return;
+  }
   shiftState = allShifts[activeShift];
+  renderTabs();
+  updatePanelVisibility();
   render();
+}
+
+function updatePanelVisibility(){
+  const isPegawai = activeShift === SPECIAL_TAB.id;
+  const formUi = document.getElementById("formLangsirUi");
+  const pegawaiPanel = document.getElementById("pegawaiPanel");
+  const shiftActions = document.getElementById("shiftActionsNormal");
+  if(formUi) formUi.style.display = isPegawai ? "none" : "";
+  if(pegawaiPanel) pegawaiPanel.style.display = isPegawai ? "" : "none";
+  if(shiftActions) shiftActions.style.display = isPegawai ? "none" : "";
+  if(isPegawai) pegawaiInitOnce();
 }
 
 /* ============== EVENTS: tabs & format bar ============== */
@@ -1988,9 +2131,496 @@ async function loadTTDFromGithub(){
   }
 }
 
-/* ============== init ============== */
+/* ============== TAB: INPUT PEGAWAI ============== */
+// Panel ini adalah versi terintegrasi dari halaman inputpegawai yang berdiri sendiri
+// (https://catkaujungtimur.github.io/inputpegawai/). Keduanya membaca & menulis ke
+// repo GitHub yang SAMA (lihat PEGAWAI_REPO_OWNER/NAME di bawah), jadi data yang
+// diisi dari sini atau dari halaman terpisah itu akan selalu sinkron satu sama lain.
+// Token GitHub TIDAK dibagi otomatis antara situs ini dan halaman terpisah itu
+// (beda origin/domain), jadi token perlu disimpan lagi di sini secara terpisah.
+
+const PEGAWAI_REPO_OWNER = "catkaujungtimur";
+const PEGAWAI_REPO_NAME = "inputpegawai";
+const PEGAWAI_DATA_PATH = "data.json";
+const PEGAWAI_LS_TOKEN_KEY = "inputpegawai_pat_v1_embedded";
+
+let pegawaiState = { jabatan: ["PLR","PLR DIPO","SCHOWING","MASINIS","PPKA"], orang: [] };
+let pegawaiSha = null;
+let pegawaiDirty = false;
+let pegawaiInitDone = false;
+
+function pegawaiInitOnce(){
+  if(pegawaiInitDone) return;
+  pegawaiInitDone = true;
+  pegawaiRenderShell();
+  pegawaiWireEvents();
+  pegawaiRenderJabatanOptions();
+  pegawaiRenderTable();
+  pegawaiUpdateStatusBar();
+  pegawaiLoadFromGithub();
+}
+
+function pegawaiRenderShell(){
+  const panel = document.getElementById("pegawaiPanel");
+  panel.innerHTML = `
+    <div class="pegawai-wrap">
+      <div class="toolbar">
+        <div>
+          <h1>Input Data Pegawai</h1>
+          <div class="sub">Nama &middot; NIPP &middot; Jabatan &mdash; sumber data untuk kolom tanda tangan di semua tab Form Perintah Langsir. Tersimpan ke repo GitHub <code>${PEGAWAI_REPO_NAME}</code>, sinkron dengan halaman input terpisah.</div>
+        </div>
+      </div>
+
+      <div class="pg-status-bar" id="pgStatusBar">
+        <span class="pg-status-dot" id="pgStatusDot"></span>
+        <span class="pg-status-msg" id="pgStatusMsg">Memeriksa token tersimpan&hellip;</span>
+        <button class="pg-linklike" id="pgBtnTokenSettings" type="button">Atur token</button>
+      </div>
+
+      <div class="pg-card" id="pgTokenCard" style="display:none;">
+        <h2>Token GitHub</h2>
+        <p class="pg-hint">
+          Token disimpan di browser ini saja (localStorage), tidak dikirim ke server manapun selain langsung ke GitHub.
+          Token yang sudah dipakai di halaman inputpegawai terpisah TIDAK otomatis ikut di sini -- perlu dipaste ulang sekali.
+        </p>
+        <div class="pg-token-row">
+          <input type="password" id="pgInpToken" placeholder="github_pat_...">
+          <button id="pgBtnSaveToken" type="button">Simpan token</button>
+          <button id="pgBtnClearToken" type="button" class="pg-ghost">Hapus token</button>
+        </div>
+        <details class="pg-help">
+          <summary>Cara membuat token</summary>
+          <div class="pg-help-body">
+            1. GitHub &rarr; foto profil &rarr; <b>Settings</b> &rarr; <b>Developer settings</b> &rarr; <b>Personal access tokens</b> &rarr; <b>Fine-grained tokens</b> &rarr; <b>Generate new token</b>.<br>
+            2. <b>Repository access</b>: pilih <i>Only select repositories</i> &rarr; pilih repo <code>${PEGAWAI_REPO_NAME}</code>.<br>
+            3. <b>Permissions</b> &rarr; <b>Repository permissions</b> &rarr; cari <b>Contents</b> &rarr; ubah ke <b>Read and write</b>.<br>
+            4. <b>Generate token</b>, lalu copy token-nya (hanya tampil sekali) dan paste di kolom atas.
+          </div>
+        </details>
+      </div>
+
+      <div class="pg-card">
+        <h2>Tambah Satu Data</h2>
+        <p class="pg-hint">Isi salah satu dulu (NIPP atau Nama), sisanya bisa menyusul &mdash; lalu lengkapi jabatan dan simpan.</p>
+        <div class="pg-form-grid">
+          <div>
+            <label class="pg-field-label">NIPP</label>
+            <input type="text" id="pgInpNipp" placeholder="contoh: 53632" inputmode="numeric">
+          </div>
+          <div>
+            <label class="pg-field-label">Nama</label>
+            <input type="text" id="pgInpNama" placeholder="contoh: SUHARTOYO" style="text-transform:uppercase;">
+          </div>
+          <div>
+            <label class="pg-field-label">Jabatan</label>
+            <div class="pg-jabatan-row">
+              <select id="pgInpJabatan"></select>
+              <button type="button" class="pg-ghost pg-small" id="pgBtnTambahJabatan" title="Tambah jabatan baru">+ Jabatan</button>
+            </div>
+          </div>
+          <div>
+            <button type="button" id="pgBtnTambahSatu">Tambah</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg-card">
+        <h2>Input Massal</h2>
+        <p class="pg-hint">
+          Paste banyak baris sekaligus, format <b>NIPP</b> [tab/koma] <b>NAMA</b> [tab/koma] <b>JABATAN</b> per baris
+          (bisa langsung copy-paste dari Excel/Spreadsheet). Baris pertama boleh berupa header &mdash; otomatis dilewati.
+          Jabatan yang belum dikenal otomatis ditambahkan ke daftar jabatan.
+        </p>
+        <textarea id="pgInpMassal" rows="8" placeholder="53590	ZAINUL	SCHOWING
+59777	FENDI K	SCHOWING
+69473	TAUFIK	PLR
+50900179	RIVAL	PLR DIPO"></textarea>
+        <div class="pg-actions-row">
+          <button type="button" id="pgBtnProsesMassal">Proses &amp; Tambahkan</button>
+          <span class="pg-count-pill" id="pgMassalPreviewCount"></span>
+        </div>
+      </div>
+
+      <div class="pg-card">
+        <h2>Daftar Data <span class="pg-count-pill" id="pgTotalCount"></span></h2>
+        <div class="pg-search-row">
+          <input type="text" id="pgFilterText" placeholder="Cari nama atau NIPP...">
+          <select id="pgFilterJabatan"><option value="">Semua jabatan</option></select>
+        </div>
+        <div id="pgTableWrap"></div>
+        <div class="pg-actions-row">
+          <button type="button" class="pg-danger pg-ghost" id="pgBtnHapusSemua">Hapus semua data</button>
+        </div>
+      </div>
+
+      <div class="pg-card">
+        <h2>Simpan ke GitHub</h2>
+        <p class="pg-hint">Perubahan di atas baru tersimpan di browser ini. Klik tombol di bawah untuk commit ke repo <code>${PEGAWAI_REPO_NAME}</code> supaya langsung dipakai oleh kolom tanda tangan di semua tab.</p>
+        <div class="pg-actions-row">
+          <button type="button" id="pgBtnSimpanGithub" class="pg-success">Simpan ke GitHub</button>
+          <button type="button" id="pgBtnMuatUlang" class="pg-ghost">Muat ulang dari GitHub</button>
+        </div>
+      </div>
+    </div>
+    <div class="pg-toast-stack" id="pgToastStack"></div>
+  `;
+}
+
+function pegawaiToast(msg, type){
+  const el = document.createElement("div");
+  el.className = "pg-toast" + (type ? " " + type : "");
+  el.textContent = msg;
+  document.getElementById("pgToastStack").appendChild(el);
+  setTimeout(()=>el.remove(), 4200);
+}
+function pegawaiGetToken(){ return localStorage.getItem(PEGAWAI_LS_TOKEN_KEY) || ""; }
+function pegawaiMarkDirty(){ pegawaiDirty = true; pegawaiUpdateStatusBar(); }
+
+function pegawaiUpdateStatusBar(){
+  const dot = document.getElementById("pgStatusDot");
+  const msg = document.getElementById("pgStatusMsg");
+  if(!dot || !msg) return;
+  const token = pegawaiGetToken();
+  if(!token){
+    dot.className = "pg-status-dot";
+    msg.textContent = "Belum ada token GitHub -- data hanya tersimpan di browser ini sampai token diatur.";
+    return;
+  }
+  if(pegawaiDirty){
+    dot.className = "pg-status-dot error";
+    msg.textContent = "Ada perubahan yang belum disimpan ke GitHub. Klik \"Simpan ke GitHub\" di bawah.";
+    return;
+  }
+  dot.className = "pg-status-dot connected";
+  msg.textContent = "Token tersedia. Data sinkron dengan GitHub.";
+}
+
+function pegawaiRenderJabatanOptions(){
+  const sel = document.getElementById("pgInpJabatan");
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = pegawaiState.jabatan.map(j=>`<option value="${escapeAttr(j)}">${escapeHtml(j)}</option>`).join("");
+  if(pegawaiState.jabatan.includes(prev)) sel.value = prev;
+
+  const filterSel = document.getElementById("pgFilterJabatan");
+  const prevFilter = filterSel.value;
+  filterSel.innerHTML = `<option value="">Semua jabatan</option>` +
+    pegawaiState.jabatan.map(j=>`<option value="${escapeAttr(j)}">${escapeHtml(j)}</option>`).join("");
+  filterSel.value = prevFilter;
+}
+
+function pegawaiParseMassalLine(line){
+  let parts = line.split("\t").map(s=>s.trim());
+  if(parts.length < 3) parts = line.split(",").map(s=>s.trim());
+  if(parts.length < 3) return null;
+  const [nipp, nama, jabatan] = parts;
+  if(!nipp && !nama) return null;
+  return { nipp: nipp.trim(), nama: nama.trim().toUpperCase(), jabatan: jabatan.trim().toUpperCase() };
+}
+function pegawaiIsHeaderLine(parsed){
+  const s = (parsed.nipp + parsed.nama + parsed.jabatan).toUpperCase();
+  return s.includes("NIPP") && s.includes("NAMA");
+}
+
+function pegawaiRenderTable(){
+  const wrap = document.getElementById("pgTableWrap");
+  if(!wrap) return;
+  const filterText = document.getElementById("pgFilterText").value.trim().toUpperCase();
+  const filterJabatan = document.getElementById("pgFilterJabatan").value;
+
+  const rows = pegawaiState.orang
+    .map((o, idx)=>({ ...o, idx }))
+    .filter(o=>{
+      if(filterJabatan && o.jabatan !== filterJabatan) return false;
+      if(filterText){
+        const hay = (o.nipp + " " + o.nama).toUpperCase();
+        if(!hay.includes(filterText)) return false;
+      }
+      return true;
+    })
+    .sort((a,b)=> a.nama.localeCompare(b.nama));
+
+  document.getElementById("pgTotalCount").textContent = `(${pegawaiState.orang.length} total)`;
+
+  if(rows.length === 0){
+    wrap.innerHTML = `<div class="pg-empty-state">Belum ada data yang cocok. Tambahkan lewat form di atas.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table class="pg-data">
+      <thead><tr><th style="width:110px;">NIPP</th><th>Nama</th><th style="width:140px;">Jabatan</th><th style="width:90px;"></th></tr></thead>
+      <tbody>
+        ${rows.map(o => `
+          <tr data-idx="${o.idx}">
+            <td class="pg-nipp">${escapeHtml(o.nipp) || "<span style='color:var(--muted)'>&mdash;</span>"}</td>
+            <td>${escapeHtml(o.nama) || "<span style='color:var(--muted)'>&mdash;</span>"}</td>
+            <td><span class="pg-badge">${escapeHtml(o.jabatan)}</span></td>
+            <td class="pg-col-actions">
+              <button class="pg-ghost pg-small" data-pgaction="edit" data-idx="${o.idx}">Edit</button>
+              <button class="pg-danger pg-ghost pg-small" data-pgaction="del" data-idx="${o.idx}">Hapus</button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function pegawaiWireEvents(){
+  document.getElementById("pgBtnTokenSettings").addEventListener("click", ()=>{
+    const card = document.getElementById("pgTokenCard");
+    card.style.display = card.style.display === "none" ? "block" : "none";
+  });
+  document.getElementById("pgBtnSaveToken").addEventListener("click", ()=>{
+    const v = document.getElementById("pgInpToken").value.trim();
+    if(!v){ pegawaiToast("Token kosong, tidak disimpan.", "error"); return; }
+    localStorage.setItem(PEGAWAI_LS_TOKEN_KEY, v);
+    document.getElementById("pgInpToken").value = "";
+    pegawaiToast("Token disimpan di browser ini.", "success");
+    pegawaiUpdateStatusBar();
+    pegawaiLoadFromGithub();
+  });
+  document.getElementById("pgBtnClearToken").addEventListener("click", ()=>{
+    localStorage.removeItem(PEGAWAI_LS_TOKEN_KEY);
+    pegawaiToast("Token dihapus.");
+    pegawaiUpdateStatusBar();
+  });
+
+  document.getElementById("pgBtnTambahJabatan").addEventListener("click", ()=>{
+    const nama = prompt("Nama jabatan baru:");
+    if(!nama) return;
+    const trimmed = nama.trim().toUpperCase();
+    if(!trimmed) return;
+    if(pegawaiState.jabatan.includes(trimmed)){ pegawaiToast("Jabatan itu sudah ada."); return; }
+    pegawaiState.jabatan.push(trimmed);
+    pegawaiRenderJabatanOptions();
+    document.getElementById("pgInpJabatan").value = trimmed;
+    pegawaiMarkDirty();
+    pegawaiToast(`Jabatan "${trimmed}" ditambahkan.`, "success");
+  });
+
+  document.getElementById("pgBtnTambahSatu").addEventListener("click", ()=>{
+    const nipp = document.getElementById("pgInpNipp").value.trim();
+    const nama = document.getElementById("pgInpNama").value.trim().toUpperCase();
+    const jabatan = document.getElementById("pgInpJabatan").value;
+    if(!nipp && !nama){ pegawaiToast("Isi NIPP atau Nama dulu.", "error"); return; }
+    if(!jabatan){ pegawaiToast("Pilih jabatan dulu.", "error"); return; }
+
+    const dup = pegawaiState.orang.find(o => (nipp && o.nipp === nipp));
+    if(dup){
+      if(!confirm(`NIPP ${nipp} sudah terdaftar atas nama ${dup.nama} (${dup.jabatan}). Timpa data ini?`)) return;
+      dup.nama = nama || dup.nama;
+      dup.jabatan = jabatan;
+    } else {
+      pegawaiState.orang.push({ nipp, nama, jabatan });
+    }
+    document.getElementById("pgInpNipp").value = "";
+    document.getElementById("pgInpNama").value = "";
+    pegawaiMarkDirty();
+    pegawaiRenderTable();
+    pegawaiToast("Ditambahkan.", "success");
+  });
+
+  document.getElementById("pgInpMassal").addEventListener("input", ()=>{
+    const lines = document.getElementById("pgInpMassal").value.split("\n").map(l=>l.trim()).filter(l=>l.length>0);
+    document.getElementById("pgMassalPreviewCount").textContent = lines.length > 0 ? `${lines.length} baris terdeteksi` : "";
+  });
+  document.getElementById("pgBtnProsesMassal").addEventListener("click", ()=>{
+    const raw = document.getElementById("pgInpMassal").value;
+    const lines = raw.split("\n").map(l=>l.trim()).filter(l=>l.length>0);
+    if(lines.length === 0){ pegawaiToast("Tidak ada baris untuk diproses.", "error"); return; }
+
+    let added = 0, updated = 0, skipped = 0, jabatanBaru = [];
+    lines.forEach((line, idx)=>{
+      const parsed = pegawaiParseMassalLine(line);
+      if(!parsed){ skipped++; return; }
+      if(idx === 0 && pegawaiIsHeaderLine(parsed)){ return; }
+      if(!parsed.nipp && !parsed.nama){ skipped++; return; }
+
+      if(parsed.jabatan && !pegawaiState.jabatan.includes(parsed.jabatan)){
+        pegawaiState.jabatan.push(parsed.jabatan);
+        jabatanBaru.push(parsed.jabatan);
+      }
+
+      const existing = parsed.nipp ? pegawaiState.orang.find(o => o.nipp === parsed.nipp) : null;
+      if(existing){
+        existing.nama = parsed.nama || existing.nama;
+        existing.jabatan = parsed.jabatan || existing.jabatan;
+        updated++;
+      } else {
+        pegawaiState.orang.push(parsed);
+        added++;
+      }
+    });
+
+    pegawaiRenderJabatanOptions();
+    pegawaiRenderTable();
+    pegawaiMarkDirty();
+    document.getElementById("pgInpMassal").value = "";
+    document.getElementById("pgMassalPreviewCount").textContent = "";
+
+    let msg = `${added} data ditambahkan, ${updated} diperbarui`;
+    if(skipped) msg += `, ${skipped} baris dilewati (format tidak dikenali)`;
+    if(jabatanBaru.length) msg += `. Jabatan baru: ${jabatanBaru.join(", ")}`;
+    pegawaiToast(msg, "success");
+  });
+
+  document.getElementById("pgFilterText").addEventListener("input", pegawaiRenderTable);
+  document.getElementById("pgFilterJabatan").addEventListener("change", pegawaiRenderTable);
+
+  document.getElementById("pgTableWrap").addEventListener("click", e=>{
+    const btn = e.target.closest("button[data-pgaction]");
+    if(!btn) return;
+    const idx = parseInt(btn.dataset.idx, 10);
+    const o = pegawaiState.orang[idx];
+    if(!o) return;
+
+    if(btn.dataset.pgaction === "del"){
+      if(!confirm(`Hapus data ${o.nama || o.nipp}?`)) return;
+      pegawaiState.orang.splice(idx, 1);
+      pegawaiMarkDirty();
+      pegawaiRenderTable();
+      pegawaiToast("Data dihapus.");
+      return;
+    }
+
+    if(btn.dataset.pgaction === "edit"){
+      const newNipp = prompt("NIPP:", o.nipp) ?? o.nipp;
+      const newNama = (prompt("Nama:", o.nama) ?? o.nama).toUpperCase();
+      const newJabatan = (prompt(`Jabatan (${pegawaiState.jabatan.join(", ")}):`, o.jabatan) ?? o.jabatan).toUpperCase();
+      o.nipp = newNipp.trim();
+      o.nama = newNama.trim();
+      o.jabatan = newJabatan.trim();
+      if(o.jabatan && !pegawaiState.jabatan.includes(o.jabatan)){
+        pegawaiState.jabatan.push(o.jabatan);
+        pegawaiRenderJabatanOptions();
+      }
+      pegawaiMarkDirty();
+      pegawaiRenderTable();
+      pegawaiToast("Data diperbarui.", "success");
+    }
+  });
+
+  document.getElementById("pgBtnHapusSemua").addEventListener("click", ()=>{
+    if(pegawaiState.orang.length === 0) return;
+    if(!confirm(`Hapus SEMUA ${pegawaiState.orang.length} data? Tindakan ini tidak bisa dibatalkan kecuali belum disimpan ke GitHub.`)) return;
+    pegawaiState.orang = [];
+    pegawaiMarkDirty();
+    pegawaiRenderTable();
+    pegawaiToast("Semua data dihapus dari tampilan lokal.");
+  });
+
+  document.getElementById("pgBtnSimpanGithub").addEventListener("click", pegawaiSaveToGithub);
+  document.getElementById("pgBtnMuatUlang").addEventListener("click", ()=>{
+    if(pegawaiDirty && !confirm("Ada perubahan lokal yang belum disimpan ke GitHub. Muat ulang akan menimpa perubahan itu. Lanjutkan?")) return;
+    pegawaiLoadFromGithub();
+  });
+}
+
+async function pegawaiLoadFromGithub(){
+  const token = pegawaiGetToken();
+  const url = `https://api.github.com/repos/${PEGAWAI_REPO_OWNER}/${PEGAWAI_REPO_NAME}/contents/${PEGAWAI_DATA_PATH}`;
+  try{
+    const res = await fetch(url, {
+      headers: token ? { "Authorization": `Bearer ${token}`, "Accept":"application/vnd.github+json" } : { "Accept":"application/vnd.github+json" }
+    });
+    if(res.status === 404){
+      pegawaiToast("data.json belum ada di repo -- akan dibuat saat pertama kali Simpan ke GitHub.", "");
+      pegawaiSha = null;
+      return;
+    }
+    if(!res.ok){
+      pegawaiToast(`Gagal memuat dari GitHub (${res.status}). Memakai data lokal.`, "error");
+      return;
+    }
+    const json = await res.json();
+    pegawaiSha = json.sha;
+    const content = decodeURIComponent(escape(atob(json.content)));
+    const parsed = JSON.parse(content);
+    if(parsed && Array.isArray(parsed.orang)){
+      pegawaiState = parsed;
+      pegawaiDirty = false;
+      pegawaiRenderJabatanOptions();
+      pegawaiRenderTable();
+      pegawaiUpdateStatusBar();
+      pegawaiToast("Data dimuat dari GitHub.", "success");
+      // data pegawai baru juga relevan utk kolom tanda tangan form langsir -- refresh juga.
+      pegawaiSyncIntoTTD();
+    }
+  }catch(e){
+    pegawaiToast("Gagal terhubung ke GitHub. Memakai data lokal (browser ini).", "error");
+  }
+}
+
+async function pegawaiSaveToGithub(){
+  const token = pegawaiGetToken();
+  if(!token){
+    pegawaiToast("Belum ada token GitHub. Klik \"Atur token\" dulu.", "error");
+    document.getElementById("pgTokenCard").style.display = "block";
+    return;
+  }
+  const btn = document.getElementById("pgBtnSimpanGithub");
+  btn.disabled = true;
+  btn.textContent = "Menyimpan...";
+  try{
+    const url = `https://api.github.com/repos/${PEGAWAI_REPO_OWNER}/${PEGAWAI_REPO_NAME}/contents/${PEGAWAI_DATA_PATH}`;
+    const body = {
+      message: `Update data pegawai (${new Date().toISOString()})`,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(pegawaiState, null, 2)))),
+    };
+    if(pegawaiSha) body.sha = pegawaiSha;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok){
+      const errJson = await res.json().catch(()=>({}));
+      throw new Error(errJson.message || `HTTP ${res.status}`);
+    }
+    const json = await res.json();
+    pegawaiSha = json.content ? json.content.sha : pegawaiSha;
+    pegawaiDirty = false;
+    pegawaiUpdateStatusBar();
+    pegawaiToast("Tersimpan ke GitHub.", "success");
+    pegawaiSyncIntoTTD();
+  }catch(e){
+    pegawaiToast("Gagal menyimpan ke GitHub: " + e.message, "error");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "Simpan ke GitHub";
+  }
+}
+
+// Setelah data pegawai berubah (load/simpan), langsung perbarui TTD yang dipakai
+// kolom tanda tangan di form langsir -- tanpa perlu reload halaman.
+function pegawaiSyncIntoTTD(){
+  const fresh = {};
+  pegawaiState.orang.forEach(o=>{
+    if(o && o.nama) fresh[o.nama] = o.nipp || "";
+  });
+  if(Object.keys(fresh).length === 0) return;
+  TTD = fresh;
+  if(shiftState){
+    shiftState.forms.forEach((form, fIdx)=>{
+      const tr = document.querySelector(`[data-signrow-for="${fIdx}"]`);
+      if(tr) renderSignRow(form, fIdx, tr);
+    });
+  }
+}
+
+
 loadAll();
-render();
+renderTabs();
+updatePanelVisibility();
+if(activeShift !== SPECIAL_TAB.id){ render(); }
 loadTTDFromGithub();
 pushHistory(); // simpan state awal sebagai titik undo paling awal
 </script>
