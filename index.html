@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -314,6 +312,9 @@
     font-size:14px; font-weight:700; margin:0 0 4px; text-transform:uppercase;
     letter-spacing:.04em; color:var(--accent);
   }
+  .pg-collapsible-head{ cursor:pointer; user-select:none; display:flex; align-items:center; gap:6px; }
+  .pg-collapsible-head:hover{ opacity:.8; }
+  .pg-collapse-arrow{ display:inline-block; font-size:11px; width:12px; }
   .pg-hint{ color:var(--muted); font-size:12px; margin:0 0 14px; line-height:1.5; }
 
   .pg-token-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -2242,14 +2243,32 @@ function pegawaiRenderShell(){
       </div>
 
       <div class="pg-card">
-        <h2>Daftar Data <span class="pg-count-pill" id="pgTotalCount"></span></h2>
-        <div class="pg-search-row">
-          <input type="text" id="pgFilterText" placeholder="Cari nama atau NIPP...">
-          <select id="pgFilterJabatan"><option value="">Semua jabatan</option></select>
+        <h2 class="pg-collapsible-head" id="pgDaftarDataHead">
+          <span class="pg-collapse-arrow" id="pgDaftarDataArrow">&#9656;</span> Daftar Data <span class="pg-count-pill" id="pgTotalCount"></span>
+        </h2>
+        <div id="pgDaftarDataBody" style="display:none;">
+          <div class="pg-search-row">
+            <input type="text" id="pgFilterText" placeholder="Cari nama atau NIPP...">
+            <select id="pgFilterJabatan"><option value="">Semua jabatan</option></select>
+          </div>
+          <div id="pgTableWrap"></div>
+          <div class="pg-actions-row">
+            <button type="button" class="pg-danger pg-ghost" id="pgBtnHapusSemua">Hapus semua data</button>
+          </div>
         </div>
-        <div id="pgTableWrap"></div>
+      </div>
+
+      <div class="pg-card">
+        <h2>Export / Import (cadangan pribadi)</h2>
+        <p class="pg-hint">
+          Simpan salinan data ke file di perangkatmu sebagai jaring pengaman pribadi &mdash; berguna kalau suatu saat
+          data di GitHub perlu dipulihkan. Ini terpisah dari "Simpan ke GitHub" di bawah; export/import TIDAK otomatis
+          mengirim apapun ke GitHub.
+        </p>
         <div class="pg-actions-row">
-          <button type="button" class="pg-danger pg-ghost" id="pgBtnHapusSemua">Hapus semua data</button>
+          <button type="button" id="pgBtnExport" class="pg-ghost">Export ke file JSON</button>
+          <button type="button" id="pgBtnImportTrigger" class="pg-ghost">Import dari file JSON</button>
+          <input type="file" id="pgFileImport" accept=".json" style="display:none;">
         </div>
       </div>
 
@@ -2511,11 +2530,69 @@ function pegawaiWireEvents(){
     pegawaiToast("Semua data dihapus dari tampilan lokal.");
   });
 
+  document.getElementById("pgDaftarDataHead").addEventListener("click", ()=>{
+    const body = document.getElementById("pgDaftarDataBody");
+    const arrow = document.getElementById("pgDaftarDataArrow");
+    const isOpen = body.style.display !== "none";
+    body.style.display = isOpen ? "none" : "block";
+    arrow.innerHTML = isOpen ? "&#9656;" : "&#9662;";
+  });
+
+  document.getElementById("pgBtnExport").addEventListener("click", ()=>{
+    pegawaiExportToFile();
+  });
+  document.getElementById("pgBtnImportTrigger").addEventListener("click", ()=>{
+    document.getElementById("pgFileImport").click();
+  });
+  document.getElementById("pgFileImport").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    pegawaiImportFromFile(file);
+    e.target.value = ""; // reset supaya bisa pilih file yang sama lagi nanti
+  });
+
   document.getElementById("pgBtnSimpanGithub").addEventListener("click", pegawaiSaveToGithub);
   document.getElementById("pgBtnMuatUlang").addEventListener("click", ()=>{
     if(pegawaiDirty && !confirm("Ada perubahan lokal yang belum disimpan ke GitHub. Muat ulang akan menimpa perubahan itu. Lanjutkan?")) return;
     pegawaiLoadFromGithub();
   });
+}
+
+function pegawaiExportToFile(){
+  const blob = new Blob([JSON.stringify(pegawaiState, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const d = new Date();
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  a.href = url;
+  a.download = `data-pegawai_${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  pegawaiToast("File JSON diunduh.", "success");
+}
+
+function pegawaiImportFromFile(file){
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(!parsed || !Array.isArray(parsed.orang)){ throw new Error("format tidak sesuai (tidak ada 'orang')"); }
+      if(!confirm(`Import akan MENGGANTI seluruh data yang sedang tampil (${pegawaiState.orang.length} data) dengan isi file ini (${parsed.orang.length} data). Perubahan ini belum tersimpan ke GitHub sampai kamu klik "Simpan ke GitHub". Lanjutkan?`)) return;
+      pegawaiState = {
+        jabatan: Array.isArray(parsed.jabatan) && parsed.jabatan.length ? parsed.jabatan : ["PLR","PLR DIPO","SCHOWING","MASINIS","PPKA"],
+        orang: parsed.orang
+      };
+      pegawaiRenderJabatanOptions();
+      pegawaiRenderTable();
+      pegawaiMarkDirty();
+      pegawaiToast(`${parsed.orang.length} data berhasil di-import dari file. Klik "Simpan ke GitHub" untuk menyimpannya secara permanen.`, "success");
+    }catch(err){
+      pegawaiToast("Gagal membaca file JSON: " + err.message, "error");
+    }
+  };
+  reader.readAsText(file);
 }
 
 async function pegawaiLoadFromGithub(){
