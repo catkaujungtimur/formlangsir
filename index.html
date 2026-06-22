@@ -108,7 +108,7 @@
   .date-display{ font-family:var(--mono); }
 
   table.main{ width:100%; border-collapse:collapse; font-size:calc(12px * var(--fs)); table-layout:fixed; }
-  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(4px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; font-size:calc(12px * var(--fs)); }
+  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(2px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; font-size:calc(12px * var(--fs)); line-height:1.2; }
   table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; line-height:1.25; }
   .col-rk{ width:var(--col-rk); }
   .col-pos{ width:var(--col-pos); text-align:center; }
@@ -123,7 +123,7 @@
 
   tr.block-header td{ background:var(--accent-soft); font-weight:700; font-size:calc(12.5px * var(--fs)); }
   .block-name-edit{
-    width:100%; min-height:calc(18px * var(--fs)); font-weight:700; font-size:calc(12.5px * var(--fs)); font-family:var(--sans);
+    width:100%; min-height:calc(15px * var(--fs)); line-height:1.2; font-weight:700; font-size:calc(12.5px * var(--fs)); font-family:var(--sans);
     padding:1px 2px; cursor:text;
   }
   .block-name-edit:focus{ outline:1px solid var(--accent); background:#fff; }
@@ -140,11 +140,15 @@
   .row-menu button{ display:block; width:100%; text-align:left; border:none; background:transparent; padding:7px 10px; font-size:11.5px; border-radius:0; }
   .row-menu button:hover{ background:var(--accent-soft); }
 
-  input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; }
+  input.cell, select.cell{ width:100%; border:none; background:transparent; font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; line-height:1.2; }
   input.cell:focus, select.cell:focus{ outline:1px solid var(--accent); background:#fff; }
-  .editable-cell{ width:100%; min-height:calc(16px * var(--fs)); font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; cursor:text; white-space:pre-wrap; word-break:break-word; }
+  .editable-cell{ width:100%; min-height:calc(13px * var(--fs)); line-height:1.2; font-size:calc(12px * var(--fs)); font-family:var(--sans); padding:1px 2px; cursor:text; white-space:pre-wrap; word-break:break-word; }
   .editable-cell:focus{ outline:1px solid var(--accent); background:#fff; }
   .editable-cell:empty:before{ content: attr(data-placeholder); color:var(--muted); }
+  /* Sel Rangkaian/No Kereta/Gerbong: kalau kosong (belum di-override manual), placeholder
+     menampilkan hasil hitungan otomatis LOKO+KERETA -- ini BUKAN sekadar hint, jadi tampilkan
+     sebagai teks biasa (bukan abu-abu) supaya tidak terlihat seperti field yang "belum diisi". */
+  .rk-editable:empty:before{ color:inherit; }
 
   .auto{ color:var(--accent); font-weight:600; font-family:var(--mono); font-size:calc(11.5px * var(--fs)); }
   .auto-line{ font-size:calc(11.5px * var(--fs)); line-height:1.4; }
@@ -621,7 +625,7 @@ function textToRows(text, posisiAwalPertama){
   let prevPos = posisiAwalPertama || "";
   lines.forEach(line=>{
     const label = extractLabelFromKet(line);
-    rows.push({ posAwal: prevPos, posAkhir: label, ket: line });
+    rows.push({ posAwal: prevPos, posAkhir: label, ket: line, rkOverride: "" });
     prevPos = label;
   });
   return rows;
@@ -632,15 +636,34 @@ function recomputeChain(rows, posisiAwalPertama){
   return rows;
 }
 
+function parseLokoLabelToTotal(label){
+  // Membaca kembali angka KERETA dari sebuah label "LOKO" / "LOKO + N KERETA" / teks manual lain.
+  // Kalau tidak ada angka KERETA yang cocok, dianggap 0 (mis. label manual seperti "LOKO + 9 KRT EX 279").
+  const s = String(label || "").toUpperCase();
+  const m = s.match(/(\d+)\s*(KERETA|KRT)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
 function computeLokoLabels(rows){
   // Label "Rangkaian/No Kereta/Gerbong" pada baris ke-i merepresentasikan apa yang
   // dibawa loko di "Posisi Awal Di Jalur" baris ke-i -- yaitu HASIL ambil/lepas dari
   // baris SEBELUMNYA, bukan hasil ambil/lepas baris itu sendiri. Karena itu label
   // dulu dibaca dari prevTotal (sebelum baris ini diterapkan), baru sesudahnya
   // prevTotal diperbarui untuk dipakai sebagai label baris berikutnya.
+  //
+  // r.rkOverride: kalau diisi manual oleh user (mis. gerakan awal bukan dari dipo loko,
+  // melainkan ex kereta yang sudah datang), teks itu DIPAKAI APA ADANYA sebagai label baris
+  // ini, dan menggantikan prevTotal otomatis untuk baris ini & seterusnya -- sampai ada
+  // kegiatan ambil/lepas baru yang mengubahnya lagi.
   let prevTotal = 0;
   return rows.map(r=>{
-    const label = "LOKO" + (prevTotal > 0 ? ` + ${prevTotal} KERETA` : "");
+    let label;
+    if(r.rkOverride && r.rkOverride.trim() !== ""){
+      label = r.rkOverride.trim();
+      prevTotal = parseLokoLabelToTotal(label);
+    } else {
+      label = "LOKO" + (prevTotal > 0 ? ` + ${prevTotal} KERETA` : "");
+    }
 
     const ket = extractTextAfterLabel(r.ket).toUpperCase();
     let ambil = 0, lepas = 0, lepasSemua = false;
@@ -808,7 +831,9 @@ function renderTbody(form, fIdx, tbody){
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><span class="auto" style="font-family:${globalFormat.fontFamily};">${lokoLabels[rIdx]}</span></td>
+        <td>
+          <div class="editable-cell rk-editable auto" contenteditable="true" style="font-family:${globalFormat.fontFamily};" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-rkcell="1" data-navcol="-1" data-placeholder="${escapeAttr(lokoLabels[rIdx])}">${escapeHtml(row.rkOverride || "")}</div>
+        </td>
         <td class="col-pos">
           <input class="cell" style="text-align:center" value="${escapeAttr(row.posAwal)}" data-form="${fIdx}" data-block="${bIdx}" data-row="${rIdx}" data-field="posAwal" data-navcol="0">
         </td>
@@ -973,6 +998,21 @@ document.getElementById("formsContainer").addEventListener("input", e=>{
 // contenteditable: ketcell, blockname, footnote -> pakai event 'input' juga (kontenteditable trigger ini)
 document.getElementById("formsContainer").addEventListener("input", e=>{
   const t = e.target;
+  if(t.dataset.rkcell !== undefined){
+    const fIdx = parseInt(t.dataset.form,10);
+    const bIdx = parseInt(t.dataset.block,10);
+    const rIdx = parseInt(t.dataset.row,10);
+    const block = shiftState.forms[fIdx].blocks[bIdx];
+    const rawText = t.textContent.replace(/\n+$/,"");
+    block.rows[rIdx].rkOverride = rawText;
+
+    // override ini mempengaruhi label baris-baris SETELAHNYA juga (lewat prevTotal di
+    // computeLokoLabels), jadi perlu update tampilan semua baris di blok ini, bukan cuma baris ini.
+    updateDerivedDisplaysOnly(fIdx, bIdx);
+    saveAll();
+    pushHistoryDebounced();
+    return;
+  }
   if(t.dataset.ketcell !== undefined){
     const fIdx = parseInt(t.dataset.form,10);
     const bIdx = parseInt(t.dataset.block,10);
@@ -1052,7 +1092,7 @@ document.getElementById("formsContainer").addEventListener("keydown", e=>{
     focusKetCell(fIdx, bIdx, rIdx+1);
   } else {
     // belum ada baris bawah -> buat baru otomatis lalu fokus ke sana
-    block.rows.push({posAwal:"", posAkhir:"", ket:""});
+    block.rows.push({posAwal:"", posAkhir:"", ket:"", rkOverride:""});
     recomputeChain(block.rows, block.posisiAwalPertama);
     render();
     focusKetCell(fIdx, bIdx, rIdx+1);
@@ -1076,9 +1116,14 @@ function focusKetCell(fIdx, bIdx, rIdx){
   });
 }
 
-// ---- Navigasi panah keyboard antar sel yang bisa diedit (posAwal, posAkhir, Keterangan, menu titik-tiga) ----
+// ---- Navigasi panah keyboard antar sel yang bisa diedit (rk, posAwal, posAkhir, Keterangan, menu titik-tiga) ----
+// Bergerak lintas baris TIDAK berhenti di batas block: kalau ArrowUp ditekan di baris
+// pertama sebuah block, fokus lanjut ke baris TERAKHIR block sebelumnya (atau form
+// sebelumnya kalau block ini adalah block pertama di form). Sebaliknya untuk ArrowDown.
 function focusNavCell(fIdx, bIdx, rIdx, navcol){
-  const selector = `[data-navcol="${navcol}"][data-form="${fIdx}"][data-block="${bIdx}"][data-row="${rIdx}"]`;
+  const target = resolveNavTarget(fIdx, bIdx, rIdx);
+  if(!target) return false;
+  const selector = `[data-navcol="${navcol}"][data-form="${target.fIdx}"][data-block="${target.bIdx}"][data-row="${target.rIdx}"]`;
   const el = document.querySelector(selector);
   if(!el) return false;
   el.focus();
@@ -1093,6 +1138,44 @@ function focusNavCell(fIdx, bIdx, rIdx, navcol){
     sel.addRange(range);
   }
   return true;
+}
+
+// Mencari koordinat (fIdx, bIdx, rIdx) yang valid terdekat, melompati batas block/form
+// kalau rIdx yang diminta di luar jangkauan block saat ini. Mengembalikan null kalau
+// sudah di ujung paling atas/bawah seluruh form (tidak ada lagi tempat untuk dituju).
+function resolveNavTarget(fIdx, bIdx, rIdx){
+  const form = shiftState.forms[fIdx];
+  if(!form) return null;
+  const block = form.blocks[bIdx];
+  if(!block) return null;
+
+  if(rIdx < 0){
+    // naik ke baris terakhir block sebelumnya; kalau ini block pertama, naik ke form sebelumnya
+    if(bIdx > 0){
+      const prevBlock = form.blocks[bIdx-1];
+      return resolveNavTarget(fIdx, bIdx-1, prevBlock.rows.length - 1);
+    }
+    if(fIdx > 0){
+      const prevForm = shiftState.forms[fIdx-1];
+      const lastBlockIdx = prevForm.blocks.length - 1;
+      const lastBlock = prevForm.blocks[lastBlockIdx];
+      return resolveNavTarget(fIdx-1, lastBlockIdx, lastBlock.rows.length - 1);
+    }
+    return null; // sudah di baris paling atas, form paling pertama
+  }
+
+  if(rIdx >= block.rows.length){
+    // turun ke baris pertama block berikutnya; kalau ini block terakhir, turun ke form berikutnya
+    if(bIdx < form.blocks.length - 1){
+      return resolveNavTarget(fIdx, bIdx+1, 0);
+    }
+    if(fIdx < shiftState.forms.length - 1){
+      return resolveNavTarget(fIdx+1, 0, 0);
+    }
+    return null; // sudah di baris paling bawah, form paling terakhir
+  }
+
+  return { fIdx, bIdx, rIdx };
 }
 
 function isCaretAtStart(el){
@@ -1146,7 +1229,7 @@ document.getElementById("formsContainer").addEventListener("keydown", e=>{
   if(e.key === "ArrowLeft") targetCol = navcol - 1;
   if(e.key === "ArrowRight") targetCol = navcol + 1;
 
-  if(targetCol < 0 || targetCol > 3) return; // sudah di kolom paling kiri/kanan, biarkan default (tidak ada aksi)
+  if(targetCol < -1 || targetCol > 3) return; // sudah di kolom paling kiri/kanan, biarkan default (tidak ada aksi)
 
   const moved = focusNavCell(fIdx, bIdx, targetRow, targetCol);
   if(moved){
@@ -1176,8 +1259,13 @@ function updateDerivedDisplaysOnly(fIdx, bIdx){
       continue;
     }
     if(currentBlockIdx === bIdx){
-      const autoSpan = trs[i].querySelector(".auto");
-      if(autoSpan && lokoLabels[cursor] !== undefined) autoSpan.textContent = lokoLabels[cursor];
+      const rkCell = trs[i].querySelector(".rk-editable");
+      if(rkCell && lokoLabels[cursor] !== undefined){
+        // placeholder selalu menampilkan hasil hitungan otomatis terbaru (dipakai saat
+        // sel kosong / tidak ada override manual). textContent TIDAK disentuh di sini
+        // supaya nilai override manual milik user tidak ketimpa & caret tidak lompat.
+        rkCell.setAttribute("data-placeholder", lokoLabels[cursor]);
+      }
       const urutCell = trs[i].querySelector(".auto-line");
       if(urutCell){
         const row = block.rows[cursor];
@@ -1283,15 +1371,15 @@ document.getElementById("formsContainer").addEventListener("click", e=>{
   if(action === "editket"){ openModal(fIdx, bIdx); return; }
 
   if(action === "addrow-end"){
-    block.rows.push({posAwal:"", posAkhir:"", ket:""});
+    block.rows.push({posAwal:"", posAkhir:"", ket:"", rkOverride:""});
     recomputeChain(block.rows, block.posisiAwalPertama);
   } else if(action === "insert-above"){
     const rIdx = parseInt(t.dataset.row,10);
-    block.rows.splice(rIdx, 0, {posAwal:"", posAkhir:"", ket:""});
+    block.rows.splice(rIdx, 0, {posAwal:"", posAkhir:"", ket:"", rkOverride:""});
     recomputeChain(block.rows, block.posisiAwalPertama);
   } else if(action === "insert-below"){
     const rIdx = parseInt(t.dataset.row,10);
-    block.rows.splice(rIdx+1, 0, {posAwal:"", posAkhir:"", ket:""});
+    block.rows.splice(rIdx+1, 0, {posAwal:"", posAkhir:"", ket:"", rkOverride:""});
     recomputeChain(block.rows, block.posisiAwalPertama);
   } else if(action === "delrow"){
     const rIdx = parseInt(t.dataset.row,10);
