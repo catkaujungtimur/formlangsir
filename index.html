@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -83,8 +84,8 @@
     --fs: 1;
   }
 
-  .title{ text-align:center; font-weight:700; font-size:calc(17px * var(--fs)); letter-spacing:.02em; margin:0 0 2px; }
-  .nomor{ text-align:center; font-size:calc(13px * var(--fs)); margin:0 0 calc(14px * var(--fs)); font-family:var(--mono); color:var(--accent); font-weight:600; }
+  .title{ text-align:center; font-weight:700; font-size:calc(17px * var(--fs)); letter-spacing:.02em; margin:0 0 1px; }
+  .nomor{ text-align:center; font-size:calc(13px * var(--fs)); margin:0 0 calc(8px * var(--fs)); font-family:var(--mono); color:var(--accent); font-weight:600; }
   .nomor-inline-input{
     border:none; background:transparent; outline:none; text-align:center;
     font-family:var(--mono); font-weight:600; color:var(--accent);
@@ -93,13 +94,13 @@
   }
   .nomor-inline-input:focus{ border-bottom:1px solid var(--accent); }
 
-  .meta{ display:grid; grid-template-columns: 110px auto 90px 1fr; gap:calc(4px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(10px * var(--fs)); align-items:center; }
+  .meta{ display:grid; grid-template-columns: 110px 1fr auto 130px; gap:calc(2px * var(--fs)) 8px; font-size:calc(12.5px * var(--fs)); margin-bottom:calc(6px * var(--fs)); align-items:center; }
   .meta label{ font-weight:700; }
   .meta .val{ font-family:var(--mono); }
   .meta input{ width:100%; border:none; border-bottom:1px dotted var(--muted); font-family:var(--mono); font-size:calc(12.5px * var(--fs)); padding:calc(2px * var(--fs)) 2px; background:transparent; }
   .meta input:focus{ outline:none; border-bottom:1px solid var(--accent); }
-  .meta-right-label{ text-align:right; }
-  .meta-right-val{ max-width:220px; }
+  .meta-right-label{ text-align:right; white-space:nowrap; }
+  .meta-right-val{ width:100%; }
   .date-nav{ display:flex; align-items:center; gap:6px; }
   .date-arrow{
     border:1px solid var(--muted); background:var(--paper); color:var(--ink);
@@ -109,8 +110,8 @@
   .date-display{ font-family:var(--mono); }
 
   table.main{ width:100%; border-collapse:collapse; font-size:calc(12px * var(--fs)); table-layout:fixed; }
-  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(2px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; font-size:calc(12px * var(--fs)); line-height:1.2; }
-  table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; line-height:1.25; }
+  table.main td, table.main th{ border:1px solid var(--ink); padding:calc(1px * var(--fs)) calc(6px * var(--fs)); vertical-align:middle; overflow:hidden; font-size:calc(12px * var(--fs)); line-height:1.15; }
+  table.main th{ background:var(--panel); font-weight:700; text-align:center; position:relative; line-height:1.2; }
   .col-rk{ width:var(--col-rk); }
   .col-pos{ width:var(--col-pos); text-align:center; }
   .col-urut{ width:var(--col-urut); }
@@ -158,7 +159,7 @@
   .open-popup-row{ text-align:center; padding:10px 0; }
   .open-popup-row .hint{ display:block; margin-top:4px; }
 
-  .footnote{ font-size:calc(11px * var(--fs)); margin-top:10px; line-height:1.5; }
+  .footnote{ font-size:calc(11px * var(--fs)); margin-top:calc(4px * var(--fs)); line-height:1.4; }
 
   /* .footer-block membungkus footnote + tabel tanda tangan jadi 1 kotak utuh
      (garis kiri-kanan-atas-bawah menyatu), sesuai permintaan: kolom pergerakan
@@ -167,20 +168,20 @@
     border:1px solid var(--ink); border-top:none; margin-top:0;
   }
   .footnote-edit{
-    width:100%; min-height:50px; font-family:var(--sans); text-align:center;
-    font-size:calc(11px * var(--fs)); padding:calc(6px * var(--fs)) 6px; background:transparent; cursor:text; white-space:pre-wrap;
+    width:100%; min-height:calc(13px * var(--fs)); font-family:var(--sans); text-align:center;
+    font-size:calc(11px * var(--fs)); padding:calc(3px * var(--fs)) 6px; background:transparent; cursor:text; white-space:pre-wrap;
   }
   .footnote-edit:focus{ outline:1px solid var(--accent); background:#fff; }
 
   .sign-caption{ display:flex; width:100%; font-size:calc(11px * var(--fs)); font-weight:700; border-top:1px solid var(--ink); }
-  .sign-caption .cap-receive{ width:83.4%; border-right:1px solid var(--ink); padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
-  .sign-caption .cap-order{ width:16.6%; padding:calc(4px * var(--fs)); background:var(--panel); text-align:center; }
+  .sign-caption .cap-receive{ width:83.4%; border-right:1px solid var(--ink); padding:calc(2px * var(--fs)); background:var(--panel); text-align:center; }
+  .sign-caption .cap-order{ width:16.6%; padding:calc(2px * var(--fs)); background:var(--panel); text-align:center; }
 
   .sign{ width:100%; border-collapse:collapse; font-size:calc(11.5px * var(--fs)); border-top:1px solid var(--ink); }
-  .sign td{ border:1px solid var(--ink); border-top:none; padding:calc(6px * var(--fs)) 8px; vertical-align:top; width:16.6%; text-align:center; }
+  .sign td{ border:1px solid var(--ink); border-top:none; padding:calc(4px * var(--fs)) 8px; vertical-align:top; width:16.6%; text-align:center; }
   .sign td:first-child{ border-left:none; }
   .sign td:last-child{ border-right:none; }
-  .sign-blank-row td{ height:calc(34px * var(--fs)); border-bottom:none; }
+  .sign-blank-row td{ height:calc(26px * var(--fs)); border-bottom:none; }
   .sign .role{ font-weight:700; text-align:center; background:var(--panel); }
   .sign .field-label{ color:var(--muted); font-size:calc(10.5px * var(--fs)); white-space:nowrap; }
   .sign select{ flex:1; min-width:0; font-family:var(--sans); font-size:calc(11.5px * var(--fs)); border:none; border-bottom:1px dotted var(--muted); background:transparent; padding:2px 0; }
@@ -616,12 +617,11 @@ function emptyFormState(){
     inpKodeKtg: "KTG",
     dateOffsetDays: 0,
     blocks: [ { name: "RANGKAIAN", posisiAwalPertama: "DL", rows: [] } ],
-    signatures: {},
     footnote: DEFAULT_FOOTNOTE
   };
 }
 function emptyShiftState(){
-  return { forms: [ emptyFormState() ] };
+  return { forms: [ emptyFormState() ], signatures: {} };
 }
 
 let allShifts = {};
@@ -999,8 +999,9 @@ function renderTbody(form, fIdx, tbody){
 function renderSignRow(form, fIdx, tr){
   tr.innerHTML = "";
   const names = Object.keys(TTD);
+  const sharedSign = shiftState.signatures || (shiftState.signatures = {});
   ROLES.forEach(role=>{
-    const current = form.signatures[role] || "";
+    const current = sharedSign[role] || "";
     const nipp = TTD[current] || "";
     // kalau nama yang sudah tersimpan di form ini tidak (lagi) ada di daftar TTD terkini
     // (mis. daftar baru saja diperbarui dari GitHub dengan penulisan yang berbeda),
@@ -1094,10 +1095,23 @@ function loadAll(){
   }catch(e){}
   SHIFTS.forEach(s=>{
     if(!allShifts[s.id] || !allShifts[s.id].forms){ allShifts[s.id] = emptyShiftState(); }
-    allShifts[s.id].forms.forEach(f=>{
+    const sh = allShifts[s.id];
+    // Migrasi data lama: dulu "signatures" disimpan per-Form (form.signatures),
+    // sekarang disimpan satu kali per-tab/shift (sh.signatures) supaya semua Form
+    // dalam tab yang sama otomatis berbagi petugas yang sama di kolom tanda tangan.
+    if(!sh.signatures) sh.signatures = {};
+    sh.forms.forEach(f=>{
       if(!f.footnote) f.footnote = DEFAULT_FOOTNOTE;
       if(!f.inpKodeKtg) f.inpKodeKtg = "KTG"; // migrasi data lama (field belum ada / kosong)
       if(f.inpNomorAwal === undefined) f.inpNomorAwal = "";
+      if(f.signatures){
+        // bawa nilai lama (kalau ada isinya dan field tujuan masih kosong) ke level shift,
+        // lalu hapus dari form supaya tidak nyangkut dobel.
+        Object.keys(f.signatures).forEach(role=>{
+          if(f.signatures[role] && !sh.signatures[role]) sh.signatures[role] = f.signatures[role];
+        });
+        delete f.signatures;
+      }
     });
   });
   shiftState = allShifts[activeShift] || allShifts["malam"];
@@ -1578,8 +1592,7 @@ document.addEventListener("click", e=>{
 document.getElementById("formsContainer").addEventListener("change", e=>{
   const t = e.target;
   if(t.dataset.role !== undefined && t.tagName !== "INPUT"){
-    const fIdx = parseInt(t.dataset.form,10);
-    shiftState.forms[fIdx].signatures[t.dataset.role] = t.value;
+    shiftState.signatures[t.dataset.role] = t.value;
     render();
   }
 });
@@ -1616,24 +1629,31 @@ function ttdRenderSuggestions(input){
   box.classList.add("open");
 }
 function ttdCommitValue(input, value){
-  const fIdx = parseInt(input.dataset.form, 10);
   const role = input.dataset.role;
-  shiftState.forms[fIdx].signatures[role] = value;
+  shiftState.signatures[role] = value;
   input.value = value;
+  const fIdx = parseInt(input.dataset.form, 10);
   const box = ttdSuggestEl(fIdx, role);
   if(box){ box.innerHTML = ""; box.classList.remove("open"); }
-  // hanya butuh refresh nipp-display & teks print-only di sel ini, bukan full render
-  // (full render akan memutus fokus & bisa menutup saran yang lain di tengah pengetikan)
-  const td = input.closest(".sign-namecell");
-  if(td){
-    const nippEl = td.querySelector(".nipp-display");
-    if(nippEl) nippEl.textContent = TTD[value] || "";
-    const printEl = td.querySelector(".name-print-only");
-    if(printEl) printEl.textContent = value;
-  }
+  // Petugas pada kolom tanda tangan dibagikan ke semua Form dalam tab/shift yang sama --
+  // jadi sel "role" yang sama di SETIAP baris tanda tangan (Form 1, 2, 3, ...) ikut
+  // diperbarui di sini, bukan cuma sel yang sedang diketik.
+  document.querySelectorAll(`.ttd-name-input[data-role="${cssEscapeAttr(role)}"]`).forEach(otherInput=>{
+    if(otherInput !== input) otherInput.value = value;
+    const td = otherInput.closest(".sign-namecell");
+    if(td){
+      const nippEl = td.querySelector(".nipp-display");
+      if(nippEl) nippEl.textContent = TTD[value] || "";
+      const printEl = td.querySelector(".name-print-only");
+      if(printEl) printEl.textContent = value;
+    }
+  });
   saveAll();
   pushHistoryDebounced();
 }
+// helper kecil: escape nilai role dipakai di dalam selector CSS attribute (cuma jaga-jaga,
+// nama role di app ini statis dari ROLES jadi aman, tapi tetap ditulis defensif)
+function cssEscapeAttr(s){ return String(s).replace(/(["\\])/g, "\\$1"); }
 
 document.getElementById("formsContainer").addEventListener("input", e=>{
   const t = e.target;
@@ -1683,7 +1703,7 @@ document.getElementById("formsContainer").addEventListener("blur", e=>{
       // ketikan tidak cocok persis dengan nama manapun di daftar -- jangan diam-diam
       // menyimpan teks bebas sebagai "nama resmi" (NIPP-nya tidak akan pernah ketemu).
       // Kembalikan ke nilai tersimpan terakhir yang valid supaya kolom NIPP tetap akurat.
-      const lastValid = shiftState.forms[parseInt(t.dataset.form,10)].signatures[t.dataset.role] || "";
+      const lastValid = shiftState.signatures[t.dataset.role] || "";
       t.value = lastValid;
     }
   }, 150);
@@ -2262,7 +2282,7 @@ NIPP	NAMA	JABATAN"></textarea>
         <p class="pg-hint">
           Simpan salinan data ke file di perangkatmu sebagai jaring pengaman pribadi &mdash; berguna kalau suatu saat
           data di GitHub perlu dipulihkan. Ini terpisah dari "Simpan ke GitHub" di bawah; export/import TIDAK otomatis
-          mengirim apapun ke GitHub. github_pat_11B67NA7Y03pCF2ccqGU8W_tt48HSLc2gnAd99
+          mengirim apapun ke GitHub.
         </p>
         <div class="pg-actions-row">
           <button type="button" id="pgBtnExport" class="pg-ghost">Export ke file JSON</button>
